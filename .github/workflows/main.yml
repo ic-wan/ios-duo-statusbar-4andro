@@ -106,20 +106,7 @@ jobs:
           }
           EOF
 
-          # 5. Vector Icon Sinyal Wi-Fi (ic_wifi_small.xml)
-          cat << 'EOF' > app/src/main/res/drawable/ic_wifi_small.xml
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="16dp"
-              android:height="12dp"
-              android:viewportWidth="24"
-              android:viewportHeight="18">
-              <path
-                  android:fillColor="#FFFFFF"
-                  android:pathData="M12,3c4.2,0 8,1.6 10.9,4.3l-2.1,2.1C18.4,7.3 15.3,6 12,6c-3.3,0 -6.4,1.3 -8.8,3.4L1.1,7.3C4,4.6 7.8,3 12,3z M12,8.5c2.8,0 5.3,1.1 7.2,2.8l-2.1,2.1c-1.3,-1.2 -3.1,-1.9 -5.1,-1.9c-2,0 -3.8,0.7 -5.1,1.9L4.8,11.3C6.7,9.6 9.2,8.5 12,8.5z M12,14c1.1,0 2,0.9 2,2s-0.9,2 -2,2s-2,-0.9 -2,-2s0.9,-2 2,-2z"/>
-          </vector>
-          EOF
-
-          # 6. Launcher Icons
+          # 5. Launcher Icons
           cat << 'EOF' > app/src/main/res/drawable/ic_launcher_bg.xml
           <?xml version="1.0" encoding="utf-8"?>
           <shape xmlns:android="http://schemas.android.com/apk/res/android"
@@ -163,7 +150,7 @@ jobs:
           </layer-list>
           EOF
 
-          # 7. Custom View untuk Bulatan Status Bar (CircularStatusView.kt)
+          # 6. Custom View Bulatan Status Bar Dinamik (CircularStatusView.kt)
           cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/CircularStatusView.kt
           package com.example.iosstatusbar
 
@@ -171,7 +158,6 @@ jobs:
           import android.graphics.*
           import android.util.AttributeSet
           import android.view.View
-          import androidx.core.content.ContextCompat
 
           class CircularStatusView @JvmOverloads constructor(
               context: Context,
@@ -185,40 +171,55 @@ jobs:
                       invalidate()
                   }
 
+              var isWifiConnected: Boolean = false
+                  set(value) {
+                      field = value
+                      invalidate()
+                  }
+
+              var wifiSignalLevel: Int = 0 // 0 s/d 4
+                  set(value) {
+                      field = value.coerceIn(0, 4)
+                      invalidate()
+                  }
+
               private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                   color = Color.parseColor("#EE0B0B0C")
                   style = Paint.Style.FILL
               }
 
               private val ringPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                  color = Color.parseColor("#22FFFFFF")
+                  color = Color.parseColor("#33FFFFFF")
                   style = Paint.Style.STROKE
                   strokeWidth = 3f
               }
 
+              // Arc Baterai Atas (HIJAU)
               private val batteryArcPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                  color = Color.parseColor("#4CAF50")
+                  color = Color.parseColor("#00E676")
                   style = Paint.Style.STROKE
-                  strokeWidth = 6f
                   strokeCap = Paint.Cap.ROUND
               }
 
+              // Arc Sinyal GSM Bawah (BIRU)
               private val gsmArcPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                  color = Color.parseColor("#80FFFFFF")
+                  color = Color.parseColor("#2196F3")
                   style = Paint.Style.STROKE
-                  strokeWidth = 4f
                   strokeCap = Paint.Cap.ROUND
               }
 
               private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                   color = Color.WHITE
-                  textSize = 24f
                   textAlign = Paint.Align.CENTER
                   typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
               }
 
+              private val wifiArcPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                  style = Paint.Style.STROKE
+                  strokeCap = Paint.Cap.ROUND
+              }
+
               private val rectF = RectF()
-              private val wifiDrawable = ContextCompat.getDrawable(context, R.drawable.ic_wifi_small)
 
               override fun onDraw(canvas: Canvas) {
                   super.onDraw(canvas)
@@ -229,48 +230,63 @@ jobs:
                   val cx = w / 2f
                   val cy = h / 2f
 
-                  // 1. Kontainer Latar Belakang Bulat Sempurna
+                  if (radius <= 0) return
+
+                  val strokeW = radius * 0.12f
+                  batteryArcPaint.strokeWidth = strokeW
+                  gsmArcPaint.strokeWidth = strokeW
+
+                  // 1. Latar Belakang Bulat Sempurna & Ring Tipis
                   canvas.drawCircle(cx, cy, radius, bgPaint)
                   canvas.drawCircle(cx, cy, radius, ringPaint)
 
-                  rectF.set(cx - radius + 3f, cy - radius + 3f, cx + radius - 3f, cy + radius - 3f)
+                  val inset = strokeW / 2f + 2f
+                  rectF.set(cx - radius + inset, cy - radius + inset, cx + radius - inset, cy + radius - inset)
 
-                  // 2. Setengah Lingkaran Atas: Panjang Garis Baterai (Proporsional 0-100% -> 0-180 Derajat)
+                  // 2. Setengah Lingkaran Atas (Baterai HIJAU)
                   val sweepAngle = 180f * (batteryPct / 100f)
-                  // Ubah warna indikator baterai jika lemah
-                  batteryArcPaint.color = when {
-                      batteryPct <= 20 -> Color.parseColor("#FF5252")
-                      batteryPct <= 50 -> Color.parseColor("#FFD700")
-                      else -> Color.parseColor("#00E676")
-                  }
                   canvas.drawArc(rectF, 180f, sweepAngle, false, batteryArcPaint)
 
-                  // 3. Setengah Lingkaran Bawah: Indikator Garis Sinyal GSM
+                  // 3. Setengah Lingkaran Bawah (GSM BIRU)
                   canvas.drawArc(rectF, 30f, 120f, false, gsmArcPaint)
 
-                  // 4. Bagian Tengah Atas: Teks Angka Baterai
-                  canvas.drawText("$batteryPct", cx, cy - 3f, textPaint)
+                  // 4. Posisi Teks Angka Baterai
+                  textPaint.textSize = radius * 0.55f
+                  if (isWifiConnected) {
+                      // Teks agak ke atas jika Wi-Fi aktif
+                      canvas.drawText("$batteryPct", cx, cy - radius * 0.05f, textPaint)
 
-                  // 5. Bagian Tengah Bawah: Ikon Kekuatan Sinyal Wi-Fi
-                  wifiDrawable?.let {
-                      val iconW = 20
-                      val iconH = 15
-                      val left = (cx - iconW / 2f).toInt()
-                      val top = (cy + 5f).toInt()
-                      it.setBounds(left, top, left + iconW, top + iconH)
-                      it.draw(canvas)
+                      // 5. Ikon Wi-Fi Dinamik berdasarkan Kuat Sinyal
+                      val wifiY = cy + radius * 0.35f
+                      wifiArcPaint.strokeWidth = radius * 0.07f
+
+                      for (i in 1..3) {
+                          val r = radius * (0.08f + i * 0.08f)
+                          rectF.set(cx - r, wifiY - r, cx + r, wifiY + r)
+                          wifiArcPaint.color = if (i <= wifiSignalLevel) Color.WHITE else Color.parseColor("#33FFFFFF")
+                          canvas.drawArc(rectF, 220f, 100f, false, wifiArcPaint)
+                      }
+                      // Titik dasar Wi-Fi
+                      val dotPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                          color = if (wifiSignalLevel > 0) Color.WHITE else Color.parseColor("#33FFFFFF")
+                          style = Paint.Style.FILL
+                      }
+                      canvas.drawCircle(cx, wifiY + radius * 0.06f, radius * 0.04f, dotPaint)
+                  } else {
+                      // Jika Wi-Fi TIDAK tersambung: Teks Baterai tepat di tengah
+                      val textY = cy + (textPaint.textSize / 3f)
+                      canvas.drawText("$batteryPct", cx, textY, textPaint)
                   }
               }
           }
           EOF
 
-          # 8. Overlay Layout (layout_stacked_status.xml)
+          # 7. Layout Overlay Status Bar (layout_stacked_status.xml)
           cat << 'EOF' > app/src/main/res/layout/layout_stacked_status.xml
           <?xml version="1.0" encoding="utf-8"?>
           <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="44dp"
-              android:layout_height="44dp"
-              android:padding="2dp">
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
 
               <com.example.iosstatusbar.CircularStatusView
                   android:id="@+id/circularStatusView"
@@ -280,7 +296,7 @@ jobs:
           </FrameLayout>
           EOF
 
-          # 9. Activity Main Layout (activity_main.xml)
+          # 8. Activity Main Layout (activity_main.xml)
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
           <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -349,11 +365,26 @@ jobs:
                       android:textSize="18sp"
                       android:textStyle="bold" />
 
+                  <!-- SLIDER UKURAN STATUS BAR -->
+                  <TextView
+                      android:id="@+id/tvLabelSize"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="16dp"
+                      android:text="Ukuran Status Bar: 38 dp" />
+
+                  <SeekBar
+                      android:id="@+id/seekSize"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:max="100"
+                      android:progress="38" />
+
                   <TextView
                       android:id="@+id/tvLabelX"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      android:layout_marginTop="16dp"
+                      android:layout_marginTop="12dp"
                       android:text="Posisi X Offset: 15 dp" />
 
                   <SeekBar
@@ -403,7 +434,7 @@ jobs:
           </ScrollView>
           EOF
 
-          # 10. AndroidManifest.xml
+          # 9. AndroidManifest.xml
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -436,7 +467,7 @@ jobs:
           </manifest>
           EOF
 
-          # 11. MainActivity.kt
+          # 10. MainActivity.kt
           cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/MainActivity.kt
           package com.example.iosstatusbar
 
@@ -455,9 +486,11 @@ jobs:
           class MainActivity : AppCompatActivity() {
 
               private lateinit var tvStatus: TextView
+              private lateinit var seekSize: SeekBar
               private lateinit var seekX: SeekBar
               private lateinit var seekY: SeekBar
               private lateinit var seekAlpha: SeekBar
+              private lateinit var tvLabelSize: TextView
               private lateinit var tvLabelX: TextView
               private lateinit var tvLabelY: TextView
               private lateinit var tvLabelAlpha: TextView
@@ -467,9 +500,11 @@ jobs:
                   setContentView(R.layout.activity_main)
 
                   tvStatus = findViewById(R.id.tvStatus)
+                  seekSize = findViewById(R.id.seekSize)
                   seekX = findViewById(R.id.seekX)
                   seekY = findViewById(R.id.seekY)
                   seekAlpha = findViewById(R.id.seekAlpha)
+                  tvLabelSize = findViewById(R.id.tvLabelSize)
                   tvLabelX = findViewById(R.id.tvLabelX)
                   tvLabelY = findViewById(R.id.tvLabelY)
                   tvLabelAlpha = findViewById(R.id.tvLabelAlpha)
@@ -479,16 +514,19 @@ jobs:
                   val btnApply = findViewById<Button>(R.id.btnApply)
 
                   val prefs = getSharedPreferences("ios_prefs", Context.MODE_PRIVATE)
+                  val sizeVal = prefs.getInt("size_dp", 38)
                   val posX = prefs.getInt("pos_x", 15)
                   val posY = prefs.getInt("pos_y", 0)
                   val alphaVal = prefs.getInt("alpha", 100)
 
+                  seekSize.progress = sizeVal
                   seekX.progress = posX
                   seekY.progress = posY
                   seekAlpha.progress = alphaVal
 
-                  updateLabels(posX, posY, alphaVal)
+                  updateLabels(sizeVal, posX, posY, alphaVal)
 
+                  seekSize.setOnSeekBarChangeListener(createSeekListener())
                   seekX.setOnSeekBarChangeListener(createSeekListener())
                   seekY.setOnSeekBarChangeListener(createSeekListener())
                   seekAlpha.setOnSeekBarChangeListener(createSeekListener())
@@ -500,13 +538,19 @@ jobs:
 
               private fun createSeekListener() = object : SeekBar.OnSeekBarChangeListener {
                   override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
-                      updateLabels(seekX.progress, seekY.progress, seekAlpha.progress)
+                      updateLabels(
+                          Math.max(20, seekSize.progress),
+                          seekX.progress,
+                          seekY.progress,
+                          seekAlpha.progress
+                      )
                   }
                   override fun onStartTrackingTouch(sb: SeekBar?) {}
                   override fun onStopTrackingTouch(sb: SeekBar?) {}
               }
 
-              private fun updateLabels(x: Int, y: Int, alpha: Int) {
+              private fun updateLabels(size: Int, x: Int, y: Int, alpha: Int) {
+                  tvLabelSize.text = "Ukuran Status Bar: $size dp"
                   tvLabelX.text = "Posisi X Offset: $x dp"
                   tvLabelY.text = "Posisi Y Offset: $y dp"
                   tvLabelAlpha.text = "Opasitas / Transparansi: $alpha%"
@@ -542,6 +586,7 @@ jobs:
               private fun saveConfig() {
                   val prefs = getSharedPreferences("ios_prefs", Context.MODE_PRIVATE)
                   prefs.edit()
+                      .putInt("size_dp", Math.max(20, seekSize.progress))
                       .putInt("pos_x", seekX.progress)
                       .putInt("pos_y", seekY.progress)
                       .putInt("alpha", seekAlpha.progress)
@@ -559,7 +604,7 @@ jobs:
           }
           EOF
 
-          # 12. StatusBarOverlayService.kt
+          # 11. StatusBarOverlayService.kt
           cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/StatusBarOverlayService.kt
           package com.example.iosstatusbar
 
@@ -609,9 +654,11 @@ jobs:
                   applyPreferences()
                   windowManager.addView(overlayView, params)
 
-                  monitor = SystemStatusMonitor(this) { pct, _ ->
+                  monitor = SystemStatusMonitor(this) { pct, _, isWifiConnected, wifiLevel ->
                       val circularView = overlayView.findViewById<CircularStatusView>(R.id.circularStatusView)
                       circularView?.batteryPct = pct
+                      circularView?.isWifiConnected = isWifiConnected
+                      circularView?.wifiSignalLevel = wifiLevel
                   }
                   monitor.start()
               }
@@ -626,12 +673,18 @@ jobs:
 
               private fun applyPreferences() {
                   val prefs = getSharedPreferences("ios_prefs", Context.MODE_PRIVATE)
+                  val sizeDp = Math.max(20, prefs.getInt("size_dp", 38))
                   val posX = prefs.getInt("pos_x", 15)
                   val posY = prefs.getInt("pos_y", 0)
                   val alphaVal = prefs.getInt("alpha", 100)
 
-                  params?.x = posX
-                  params?.y = posY
+                  val density = resources.displayMetrics.density
+                  val sizePx = (sizeDp * density).toInt()
+
+                  params?.width = sizePx
+                  params?.height = sizePx
+                  params?.x = (posX * density).toInt()
+                  params?.y = (posY * density).toInt()
                   overlayView.alpha = alphaVal / 100f
               }
 
@@ -651,7 +704,7 @@ jobs:
           }
           EOF
 
-          # 13. SystemStatusMonitor.kt
+          # 12. SystemStatusMonitor.kt
           cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/SystemStatusMonitor.kt
           package com.example.iosstatusbar
 
@@ -659,36 +712,69 @@ jobs:
           import android.content.Context
           import android.content.Intent
           import android.content.IntentFilter
+          import android.net.ConnectivityManager
+          import android.net.NetworkCapabilities
+          import android.net.wifi.WifiManager
           import android.os.BatteryManager
 
           class SystemStatusMonitor(
               private val context: Context,
-              private val onStatusChanged: (batteryPct: Int, isCharging: Boolean) -> Unit
+              private val onStatusChanged: (batteryPct: Int, isCharging: Boolean, isWifiConnected: Boolean, wifiSignalLevel: Int) -> Unit
           ) {
-              private val batteryReceiver = object : BroadcastReceiver() {
+              private val receiver = object : BroadcastReceiver() {
                   override fun onReceive(ctx: Context?, intent: Intent?) {
-                      intent?.let {
-                          val level = it.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
-                          val scale = it.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
-                          val status = it.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
-                          val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-                                  status == BatteryManager.BATTERY_STATUS_FULL
-                          val batteryPct = if (level != -1 && scale != -1) {
-                              (level * 100 / scale.toFloat()).toInt()
-                          } else 0
-                          onStatusChanged(batteryPct, isCharging)
-                      }
+                      checkStatus()
                   }
               }
 
               fun start() {
-                  val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-                  context.registerReceiver(batteryReceiver, filter)
+                  val filter = IntentFilter().apply {
+                      addAction(Intent.ACTION_BATTERY_CHANGED)
+                      addAction(WifiManager.RSSI_CHANGED_ACTION)
+                      addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
+                      addAction(ConnectivityManager.CONNECTIVITY_ACTION)
+                  }
+                  context.registerReceiver(receiver, filter)
+                  checkStatus()
+              }
+
+              private fun checkStatus() {
+                  // Baterai
+                  val batteryIntent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+                  val level = batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+                  val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+                  val status = batteryIntent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+                  val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                          status == BatteryManager.BATTERY_STATUS_FULL
+                  val batteryPct = if (level != -1 && scale != -1) {
+                      (level * 100 / scale.toFloat()).toInt()
+                  } else 76
+
+                  // Wi-Fi Status & Signal Level
+                  val connManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+                  val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+
+                  var isWifiConnected = false
+                  var wifiLevel = 0
+
+                  connManager?.let { cm ->
+                      val network = cm.activeNetwork
+                      val capabilities = cm.getNetworkCapabilities(network)
+                      isWifiConnected = capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+                  }
+
+                  if (isWifiConnected && wifiManager != null) {
+                      val wifiInfo = wifiManager.connectionInfo
+                      val rssi = wifiInfo.rssi
+                      wifiLevel = WifiManager.calculateSignalLevel(rssi, 5) // 0..4
+                  }
+
+                  onStatusChanged(batteryPct, isCharging, isWifiConnected, wifiLevel)
               }
 
               fun stop() {
                   try {
-                      context.unregisterReceiver(batteryReceiver)
+                      context.unregisterReceiver(receiver)
                   } catch (_: Exception) {}
               }
           }
@@ -733,20 +819,11 @@ jobs:
 
           **iOS Duo Status Bar** adalah aplikasi Android berbasis *System Alert Window (Overlay)* yang dirancang untuk menghadirkan tampilan status bar terpadu bergaya iOS Duo secara presisi dan elegan di sudut atas layar Android Anda.
 
-          Proyek ini dibuat secara terstruktur, bersih, dan modular menggunakan Kotlin serta Android Jetpack komponen dasar, sehingga sangat terbuka untuk dikembangkan bersama oleh komunitas (*open-source collaborative project*).
-
           ---
 
           ## 📥 Download APK (Build Terakhir)
 
-          Anda dapat mengunduh APK hasil kompilasi otomatis (*CI/CD Build*) secara langsung melalui tautan berikut:
-
           🔗 **[Halaman Artifact Download Build Terakhir (${{ env.APK_NAME }})](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})**
-
-          > 💡 **Cara Mengunduh:**
-          > 1. Klik tautan di atas untuk menuju halaman detail *GitHub Actions Run*.
-          > 2. Gulir layar ke bagian paling bawah pada seksi **Artifacts**.
-          > 3. Klik pada file **\`${{ env.APK_NAME }}\`** (atau file `.zip` artifact) untuk mengunduhnya langsung ke perangkat Anda.
 
           ---
 
@@ -765,46 +842,11 @@ jobs:
 
           ## ✨ Fitur Utama
 
-          * **Compact Circular Overlay**: Menampilkan bulatan status bar sempurna di sudut kanan atas layar tanpa mengganggu navigasi.
-          * **Dynamic Battery Arc**: Garis busur setengah lingkaran atas melengkung secara dinamik (*0°-180°*) mengikuti sisa persentase daya baterai.
-          * **Wi-Fi & Cellular Signal Indicators**: Indikator kekuatan sinyal Wi-Fi di tengah dan busur sinyal GSM di setengah lingkaran bawah.
-          * **Custom Control Configuration**:
-            * **X Offset Slider**: Mengatur pergeseran horizontal ikon status bar.
-            * **Y Offset Slider**: Mengatur pergeseran vertikal sesuai dengan ukuran *notch* atau *punch-hole* HP.
-            * **Opacity / Alpha Slider**: Mengatur tingkat transparansi tampilan dari 0% hingga 100%.
-          * **Persistensi Pengaturan**: Nilai posisi dan opasitas tersimpan otomatis di `SharedPreferences`.
-
-          ---
-
-          ## 🏗️ Arsitektur & Struktur Proyek
-
-          Aplikasi ini dirancang dengan arsitektur modular yang memisahkan antara antarmuka konfigurasi, *Service* tampilan overlay, dan *Custom View* khusus penampil indikator.
-
-          ```text
-          app/src/main/java/com/example/iosstatusbar/
-          ├── MainActivity.kt           # UI Pengaturan posisi, transparansi, & kontrol service
-          ├── StatusBarOverlayService.kt # Foreground/Overlay Service penampil status bar
-          ├── CircularStatusView.kt      # Custom Canvas View penampil garis busur & ikon
-          └── SystemStatusMonitor.kt     # Pemantau event baterai & status jaringan sistem
-          ```
-
-          ---
-
-          ## 🛠️ Panduan Pengembangan & Kontribusi (Collaborators Welcome!)
-
-          Proyek ini sangat membutuhkan kontribusi dari pengembang Android lain untuk memperkaya fitur dan kompatibilitas perangkat!
-
-          ### Langkah Memulai Pengembangan:
-          ```bash
-          # 1. Clone repositori ini
-          git clone [https://github.com/$](https://github.com/$){{ github.repository }}.git
-
-          # 2. Masuk ke direktori proyek
-          cd ${{ github.event.repository.name }}
-
-          # 3. Jalankan kompilasi awal via Gradle Wrapper
-          ./gradlew assembleDebug
-          ```
+          * **Compact Circular Overlay**: Menampilkan bulatan status bar sempurna di sudut kanan atas layar.
+          * **Custom Size Control**: Slider pengatur ukuran diameter bulatan status bar (20–100 dp).
+          * **Green Battery Arc**: Garis busur setengah lingkaran atas warna Hijau (`#00E676`) melengkung dinamik mengikuti sisa persentase baterai.
+          * **Blue GSM Signal Arc**: Garis busur setengah lingkaran bawah warna Biru (`#2196F3`).
+          * **Conditional Wi-Fi Bar**: Otomatis menyembunyikan ikon Wi-Fi saat terputus, dan menampilkan bar sinyal bertingkat (1-4) saat tersambung.
 
           ---
 
