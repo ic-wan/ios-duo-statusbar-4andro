@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="iOS Duo Status Bar"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Status: Nonaktif"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnStart"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="START" />
+
+            <Button
+                android:id="@+id/btnStop"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:text="STOP" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="Overlay Configuration"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvLabelSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="Ukuran ikon: 34 dp" />
+
+        <SeekBar
+            android:id="@+id/seekSize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="76"
+            android:progress="10" />
+
+        <TextView
+            android:id="@+id/tvLabelX"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Offset kanan (X): 10 dp" />
+
+        <SeekBar
+            android:id="@+id/seekX"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="10" />
+
+        <TextView
+            android:id="@+id/tvLabelY"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Offset vertikal (Y): -8 dp" />
+
+        <SeekBar
+            android:id="@+id/seekY"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="128"
+            android:progress="40" />
+
+        <TextView
+            android:id="@+id/tvLabelAlpha"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Opasitas: 100%" />
+
+        <SeekBar
+            android:id="@+id/seekAlpha"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="100" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="AUTO Contrast: warna foreground mengikuti mode terang/gelap sistem, dengan micro-halo hitam/putih untuk menjaga ketajaman pada wallpaper yang kompleks. Tidak memakai screen capture."
+            android:textSize="13sp" />
+
+        <Button
+            android:id="@+id/btnApply"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="SIMPAN &amp; TERAPKAN" />
+
+    </LinearLayout>
+</ScrollView>
