@@ -1,0 +1,135 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - 'feature/**'
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Generate Gradle Wrapper
+        if: ${{ !hashFiles('gradlew') }}
+        run: gradle wrapper --gradle-version 8.7 --distribution-type bin
+
+      - name: Make Gradlew executable
+        run: chmod +x gradlew
+
+      - name: Validate Android project
+        run: ./gradlew --no-daemon :app:lintRelease
+
+      - name: Prepare signing configuration
+        shell: bash
+        env:
+          RELEASE_KEYSTORE_B64: ${{ secrets.RELEASE_KEYSTORE_B64 }}
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -n "${RELEASE_KEYSTORE_B64:-}" ]; then
+            echo "$RELEASE_KEYSTORE_B64" | base64 --decode > release.keystore
+            {
+              echo "RELEASE_STORE_FILE=$(pwd)/release.keystore"
+              echo "RELEASE_STORE_PASSWORD=${RELEASE_STORE_PASSWORD}"
+              echo "RELEASE_KEY_ALIAS=${RELEASE_KEY_ALIAS}"
+              echo "RELEASE_KEY_PASSWORD=${RELEASE_KEY_PASSWORD}"
+            } >> "$GITHUB_ENV"
+          else
+            echo "No release keystore secrets configured; CI will use the Android debug keystore for an installable artifact."
+          fi
+
+      - name: Build release APK
+        run: |
+          if [ -n "${RELEASE_STORE_FILE:-}" ]; then
+            ./gradlew --no-daemon clean :app:assembleRelease               -PRELEASE_STORE_FILE="$RELEASE_STORE_FILE"               -PRELEASE_STORE_PASSWORD="$RELEASE_STORE_PASSWORD"               -PRELEASE_KEY_ALIAS="$RELEASE_KEY_ALIAS"               -PRELEASE_KEY_PASSWORD="$RELEASE_KEY_PASSWORD"
+          else
+            ./gradlew --no-daemon clean :app:assembleRelease
+          fi
+
+      - name: Prepare release artifact
+        id: artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          export TZ=Asia/Jakarta
+          BUILD_DATE="$(date '+%Y-%m-%d %H:%M:%S WIB')"
+          FILE_DATE="$(date '+%Y%m%d_%H%M%S')"
+          APK_NAME="iOS_Duo_Status_Bar_${FILE_DATE}.apk"
+
+          mkdir -p release_output
+          cp app/build/outputs/apk/release/app-release.apk "release_output/${APK_NAME}"
+
+          echo "apk_name=${APK_NAME}" >> "$GITHUB_OUTPUT"
+          echo "build_date=${BUILD_DATE}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.artifact.outputs.apk_name }}
+          path: release_output/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Update README build metadata
+        if: ${{ github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message || '', '[skip ci]') }}
+        env:
+          BUILD_DATE: ${{ steps.artifact.outputs.build_date }}
+          APK_NAME: ${{ steps.artifact.outputs.apk_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import os, re
+
+          p = Path("README.md")
+          text = p.read_text(encoding="utf-8") if p.exists() else "# iOS Duo Status Bar\n"
+
+          text = re.sub(r"<!-- BUILD_META_START -->.*?<!-- BUILD_META_END -->",
+                        f"""<!-- BUILD_META_START -->
+          **Build terakhir:** `{os.environ['BUILD_DATE']}`  
+          **APK artifact:** `{os.environ['APK_NAME']}`  
+          **Run:** {os.environ['RUN_URL']}
+          <!-- BUILD_META_END -->""",
+                        text, flags=re.S)
+
+          p.write_text(text, encoding="utf-8")
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --cached --quiet || (
+            git commit -m "docs: update latest build metadata [skip ci]" &&
+            git push origin HEAD:${GITHUB_REF_NAME}
+          )
