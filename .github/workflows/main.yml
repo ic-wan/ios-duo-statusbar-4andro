@@ -65,7 +65,7 @@ jobs:
           android.nonTransitiveRClass=true
           EOF
 
-          # 4. app/build.gradle
+          # 4. app/build.gradle (Ditambahkan signingConfig untuk otomatis Sign APK)
           cat << 'EOF' > app/build.gradle
           plugins {
               id 'com.android.application'
@@ -87,6 +87,7 @@ jobs:
               buildTypes {
                   release {
                       minifyEnabled false
+                      signingConfig signingConfigs.debug
                   }
               }
               compileOptions {
@@ -645,7 +646,7 @@ jobs:
       - name: Generate Gradle Wrapper
         run: gradle wrapper --gradle-version 8.2
 
-      - name: Make Gradlew Executable & Build APK
+      - name: Make Gradlew Executable & Build Signed APK
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease
@@ -658,12 +659,12 @@ jobs:
           APK_NAME="iOS_Duo_Status_Bar_${FILE_DATE}.apk"
 
           mkdir -p release_output
-          if [ -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
-            cp app/build/outputs/apk/release/app-release-unsigned.apk release_output/${APK_NAME}
-          elif [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
+          if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
             cp app/build/outputs/apk/release/app-release.apk release_output/${APK_NAME}
-          else
+          elif [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
             cp app/build/outputs/apk/debug/app-debug.apk release_output/${APK_NAME}
+          else
+            cp app/build/outputs/apk/release/app-release-unsigned.apk release_output/${APK_NAME}
           fi
 
           echo "BUILD_DATE=${BUILD_DATE}" >> $GITHUB_ENV
@@ -672,23 +673,130 @@ jobs:
       - name: Update README.md
         run: |
           cat << EOF > README.md
-          # iOS Duo Status Bar
+          # 📱 iOS Duo Status Bar for Android
 
-          Aplikasi Android Overlay Status Bar dengan tampilan gaya iOS Duo.
+          [![Build Status](https://github.com/${{ github.repository }}/actions/workflows/main.yml/badge.svg)](https://github.com/${{ github.repository }}/actions)
+          [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
+          [![API Level](https://img.shields.io/badge/API-24%2B-blue.svg)](https://android-arsenal.com/api?level=24)
+          [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-          ## 📱 Informasi Build Terakhir
-          - **Status Build**: ✅ Selesai
-          - **Waktu Kompilasi**: ${{ env.BUILD_DATE }}
-          - **Nama File Output**: \`${{ env.APK_NAME }}\`
-          - **Target Android**: SDK 34 (Android 14)
-          - **Min Android**: SDK 24 (Android 7.0)
+          **iOS Duo Status Bar** adalah aplikasi Android berbasis *System Alert Window (Overlay)* yang dirancang untuk menghadirkan tampilan status bar terpadu bergaya iOS Duo secara presisi dan elegan di sudut atas layar Android Anda.
 
-          ## ⚙️ Fitur Utama
-          - Bulatan overlay terpadu di pojok kanan atas.
-          - Indikator Persentase Baterai.
-          - Indikator Sinyal Wi-Fi.
-          - 4 Titik Indikator Sinyal GSM.
-          - Pengaturan Posisi X/Y Offset & Opasitas/Transparansi secara interaktif.
+          Proyek ini dibuat secara terstruktur, bersih, dan modular menggunakan Kotlin serta Android Jetpack komponen dasar, sehingga sangat terbuka untuk dikembangkan bersama oleh komunitas (*open-source collaborative project*).
+
+          ---
+
+          ## 📥 Download APK (Build Terakhir)
+
+          Anda dapat mengunduh APK hasil kompilasi otomatis (*CI/CD Build*) secara langsung melalui tautan berikut:
+
+          🔗 **[Halaman Artifact Download Build Terakhir (${{ env.APK_NAME }})](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})**
+
+          > 💡 **Cara Mengunduh:**
+          > 1. Klik tautan di atas untuk menuju halaman detail *GitHub Actions Run*.
+          > 2. Gulir layar ke bagian paling bawah pada seksi **Artifacts**.
+          > 3. Klik pada file **\`${{ env.APK_NAME }}\`** (atau file `.zip` artifact) untuk mengunduhnya langsung ke perangkat Anda.
+
+          ---
+
+          ## 📊 Informasi Kompilasi Saat Ini
+
+          | Parameter | Detail Spesifikasi |
+          | :--- | :--- |
+          | **Status Build** | ✅ Sukses Diselesaikan |
+          | **Waktu Kompilasi** | `${{ env.BUILD_DATE }}` |
+          | **Nama File Output** | `${{ env.APK_NAME }}` |
+          | **Target SDK** | Android 14 (SDK 34) |
+          | **Minimum SDK** | Android 7.0 Nougat (SDK 24) |
+          | **Environment** | Java 17 + Gradle 8.2 + Kotlin 1.9.22 |
+
+          ---
+
+          ## ✨ Fitur Utama
+
+          * **Compact Floating Overlay**: Menampilkan bulatan status bar minimalis di sudut kanan atas layar tanpa mengganggu navigasi aplikasi lain.
+          * **Real-time Battery Monitor**: Menampilkan persentase daya baterai secara akurat dan langsung terhubung dengan `BatteryManager` Android.
+          * **Wi-Fi & Cellular Signal Indicators**: Indikator ikon Wi-Fi dan 4-dot sinyal GSM bergaya khas iOS.
+          * **Custom Control Configuration**:
+            * **X Offset Slider**: Mengatur pergeseran horizontal ikon status bar.
+            * **Y Offset Slider**: Mengatur pergeseran vertikal sesuai dengan ukuran *notch* atau *punch-hole* HP.
+            * **Opacity / Alpha Slider**: Mengatur tingkat transparansi tampilan dari 0% hingga 100%.
+          * **Persistensi Pengaturan**: Nilai posisi dan opasitas tersimpan otomatis di `SharedPreferences`.
+
+          ---
+
+          ## 🏗️ Arsitektur & Struktur Proyek
+
+          Aplikasi ini dirancang dengan arsitektur modular yang memisahkan antara antarmuka konfigurasi, *Service* tampilan overlay, dan *BroadcastReceiver* pemantau sistem.
+
+          ```text
+          app/src/main/java/com/example/iosstatusbar/
+          ├── MainActivity.kt           # UI Pengaturan posisi, transparansi, & kontrol service
+          ├── StatusBarOverlayService.kt # Foreground/Overlay Service penampil status bar
+          └── SystemStatusMonitor.kt     # Pemantau event baterai & status jaringan sistem
+          ```
+
+          ### Komponen Tampilan (XML Resources):
+          * `layout_stacked_status.xml`: Tampilan layout utama bulatan status bar.
+          * `bg_status_circle.xml`: Shape drawable dengan border tipis elegan.
+          * `ic_wifi_small.xml` & `ic_gsm_dots.xml`: Vector drawable independen untuk indikator sinyal.
+
+          ---
+
+          ## 🛠️ Panduan Pengembangan & Kontribusi (Collaborators Welcome!)
+
+          Proyek ini sangat membutuhkan kontribusi dari pengembang Android lain untuk memperkaya fitur dan kompatibilitas perangkat!
+
+          ### Prasyarat Pengembangan Lokal:
+          1. **JDK 17** atau yang lebih baru.
+          2. **Android Studio** (Hedgehog / Jellyfish / versi lebih baru direkomendasikan).
+          3. **Android SDK 34**.
+
+          ### Langkah Memulai Pengembangan:
+          ```bash
+          # 1. Clone repositori ini
+          git clone [https://github.com/$](https://github.com/$){{ github.repository }}.git
+
+          # 2. Masuk ke direktori proyek
+          cd ${{ github.event.repository.name }}
+
+          # 3. Jalankan kompilasi awal via Gradle Wrapper
+          ./gradlew assembleDebug
+          ```
+
+          ### Alur Kontribusi (*Pull Request*):
+          1. **Fork** repositori ini.
+          2. Buat *feature branch* baru (`git checkout -b feature/FiturBaru`).
+          3. Commit perubahan Anda (`git commit -m 'feat: menambahkan fitur X'`).
+          4. Push branch Anda (`git push origin feature/FiturBaru`).
+          5. Buka **Pull Request** ke branch `main`.
+
+          ---
+
+          ## 🗺️ Peta Jalan Fitur (Roadmap)
+
+          Berikut adalah beberapa fitur yang direncanakan untuk versi mendatang (Anda sangat disarankan membantu mengerjakan poin berikut):
+
+          - [ ] **Dynamic Notch Auto-alignment**: Penyesuaian otomatis posisi berdasarkan koordinat *DisplayCutout* HP.
+          - [ ] **Interactive Gestures**: Aksi *double tap* atau *long press* pada overlay untuk membuka Quick Settings.
+          - [ ] **Real Wi-Fi/GSM Receiver**: Pemantauan level dBm sinyal secara dinamik (*SignalStrength API*).
+          - [ ] **Theme Personalization**: Pilihan warna latar belakang dan warna ikon kustom.
+          - [ ] **Auto-start on Boot**: Memulai service secara otomatis saat HP baru dinyalakan (`RECEIVE_BOOT_COMPLETED`).
+
+          ---
+
+          ## 🔒 Permintaan Izin (Permissions)
+
+          Aplikasi ini memerlukan izin khusus berikut agar dapat berjalan dengan normal:
+          * `SYSTEM_ALERT_WINDOW`: Untuk menampilkan overlay di atas aplikasi lain.
+          * `FOREGROUND_SERVICE`: Menjaga agar tampilan overlay tidak dimatikan oleh OS.
+          * `ACCESS_NETWORK_STATE` & `ACCESS_WIFI_STATE`: Untuk membaca status koneksi jaringan.
+
+          ---
+
+          ## 📄 Lisensi
+
+          Didistribusikan di bawah Lisensi **MIT**. Lihat file `LICENSE` untuk informasi lebih lanjut.
           EOF
 
       - name: Commit & Push README Update
@@ -696,7 +804,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git diff --staged --quiet || (git commit -m "docs: update build status [${{ env.BUILD_DATE }}]" && git push)
+          git diff --staged --quiet || (git commit -m "docs: update comprehensive README [${{ env.BUILD_DATE }}]" && git push)
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
