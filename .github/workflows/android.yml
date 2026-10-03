@@ -70,7 +70,11 @@ jobs:
       - name: Build release APK
         run: |
           if [ -n "${RELEASE_STORE_FILE:-}" ]; then
-            ./gradlew --no-daemon clean :app:assembleRelease               -PRELEASE_STORE_FILE="$RELEASE_STORE_FILE"               -PRELEASE_STORE_PASSWORD="$RELEASE_STORE_PASSWORD"               -PRELEASE_KEY_ALIAS="$RELEASE_KEY_ALIAS"               -PRELEASE_KEY_PASSWORD="$RELEASE_KEY_PASSWORD"
+            ./gradlew --no-daemon clean :app:assembleRelease \
+              -PRELEASE_STORE_FILE="$RELEASE_STORE_FILE" \
+              -PRELEASE_STORE_PASSWORD="$RELEASE_STORE_PASSWORD" \
+              -PRELEASE_KEY_ALIAS="$RELEASE_KEY_ALIAS" \
+              -PRELEASE_KEY_PASSWORD="$RELEASE_KEY_PASSWORD"
           else
             ./gradlew --no-daemon clean :app:assembleRelease
           fi
@@ -88,8 +92,11 @@ jobs:
           mkdir -p release_output
           cp app/build/outputs/apk/release/app-release.apk "release_output/${APK_NAME}"
 
+          SHA256="$(sha256sum "release_output/${APK_NAME}" | awk '{print $1}')"
+
           echo "apk_name=${APK_NAME}" >> "$GITHUB_OUTPUT"
           echo "build_date=${BUILD_DATE}" >> "$GITHUB_OUTPUT"
+          echo "sha256=${SHA256}" >> "$GITHUB_OUTPUT"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -104,6 +111,7 @@ jobs:
         env:
           BUILD_DATE: ${{ steps.artifact.outputs.build_date }}
           APK_NAME: ${{ steps.artifact.outputs.apk_name }}
+          SHA256: ${{ steps.artifact.outputs.sha256 }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
@@ -119,6 +127,7 @@ jobs:
                         f"""<!-- BUILD_META_START -->
           **Build terakhir:** `{os.environ['BUILD_DATE']}`  
           **APK artifact:** `{os.environ['APK_NAME']}`  
+          **SHA-256:** `{os.environ['SHA256']}`  
           **Run:** {os.environ['RUN_URL']}
           <!-- BUILD_META_END -->""",
                         text, flags=re.S)
