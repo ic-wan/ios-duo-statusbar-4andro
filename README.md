@@ -16,12 +16,12 @@ Proyek ini dibangun dari dasar menggunakan **Pure Native Kotlin Canvas Drawing &
 
 Anda dapat mengunduh APK siap pakai hasil kompilasi otomatis (*CI/CD Pipeline*) melalui tautan resmi di bawah ini:
 
-🔗 **[Halaman Artifact Download Build Terakhir (iOS_Duo_Status_Bar_20261004_005146.apk)](https://github.com/ic-wan/ios-duo-statusbar-4andro/actions/runs/37141881091)**
+🔗 **[Halaman Artifact Download Build Terakhir (iOS_Duo_Status_Bar_20261004_011215.apk)](https://github.com/ic-wan/ios-duo-statusbar-4andro/actions/runs/37143169835)**
 
 > 💡 **Petunjuk Unduh & Instalasi:**
 > 1. Klik tautan di atas untuk membuka halaman *GitHub Actions Run Detail*.
 > 2. Gulir ke bagian **Artifacts** di bagian paling bawah halaman.
-> 3. Unduh berkas **`iOS_Duo_Status_Bar_20261004_005146.apk`**.
+> 3. Unduh berkas **`iOS_Duo_Status_Bar_20261004_011215.apk`**.
 > 4. Jalankan instalasi di perangkat Android Anda (Mendukung Android 7.0 hingga Android 14/15 seperti Samsung Galaxy S25).
 
 ---
@@ -44,12 +44,13 @@ Anda dapat mengunduh APK siap pakai hasil kompilasi otomatis (*CI/CD Pipeline*) 
 
 
 
-1. **Unified Dual-Bracket Battery Arc**:
-   - Garis busur melengkung di sisi Kiri dan Kanan () yang secara dinamis memanjang/memendek sesuai sisa kapasitas baterai (0–100%).
-2. **Adaptive Contrast Auto-Outline Engine**:
+1. **Symmetrical Dual-Bracket Battery Arc**:
+   - Garis busur melengkung ganda di sisi Kiri dan Kanan () yang secara teratur terisi dari bawah ke atas sesuai daya baterai.
+   - Memiliki *dim-track translucent arc* di latar belakang agar bentuk busur utuh bergaya Apple Watch selalu membayang rapi.
+2. **Adaptive Contrast Outer Halo**:
    - Menggunakan teknik rendering *Dual-pass Stroke Halo Shadow*.
    - Menjamin seluruh garis, angka, dan titik indikator **tetap kontras dan 100% terbaca jelas di atas wallpaper apa pun** (gelap, terang, maupun *colorful*).
-3. **Real-time Wi-Fi Signal Telemetry**:
+3. **Vector Wi-Fi Signal Telemetry**:
    - Tampilan busur sinyal Wi-Fi di posisi pusat secara instan menyesuaikan dengan indeks RSSI jaringan (*Signal Level 0..4*).
 4. **Curved Cellular GSM Signal Dots**:
    - 4 titik indikator sinyal seluler yang tersusun melengkung presisi mengikuti kontur busur lingkaran bawah.
@@ -81,23 +82,6 @@ Kami sangat menyambut kontribusi dari pengembang Android komunitas untuk pengemb
 3. Commit perubahan secara terstruktur ().
 4. Push branch Anda ().
 5. Buka **Pull Request** ke branch .
-
----
-
-## 🗺️ Peta Jalan Fitur Terencana (Collaborator Roadmap)
-
-- [ ] **Dynamic Wallpaper Luminance Detection**: Membaca nilai RGB piksel layar di bawah overlay untuk penyesuaian otomatis warna dinamis.
-- [ ] **Interactive Double-Tap Actions**: Membuka Quick Settings atau Notification Center saat overlay diketuk dua kali.
-- [ ] **Custom Color Palette Picker**: Pilihan kustomisasi warna bebas untuk busur baterai dan ikon.
-- [ ] **Auto Start on Boot**: Listener  agar service otomatis aktif saat HP dihidupkan.
-
----
-
-## 🔒 Kebijakan Izin Sistem (Permissions)
-
-* : Menampilkan overlay di atas semua antarmuka aplikasi lain.
-* : Menjaga Service tetap berjalan stabil di latar belakang tanpa dihentikan sistem OS.
-*  & : Membaca level kekuatan sinyal Wi-Fi.
 
 ---
 
