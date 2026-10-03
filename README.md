@@ -15,12 +15,12 @@ Proyek ini dibuat secara terstruktur, bersih, dan modular menggunakan Kotlin ser
 
 Anda dapat mengunduh APK hasil kompilasi otomatis (*CI/CD Build*) secara langsung melalui tautan berikut:
 
-🔗 **[Halaman Artifact Download Build Terakhir (iOS_Duo_Status_Bar_20261004_000111.apk)](https://github.com/ic-wan/ios-duo-statusbar-4andro/actions/runs/37138862159)**
+🔗 **[Halaman Artifact Download Build Terakhir (iOS_Duo_Status_Bar_20261004_001633.apk)](https://github.com/ic-wan/ios-duo-statusbar-4andro/actions/runs/37139761234)**
 
 > 💡 **Cara Mengunduh:**
 > 1. Klik tautan di atas untuk menuju halaman detail *GitHub Actions Run*.
 > 2. Gulir layar ke bagian paling bawah pada seksi **Artifacts**.
-> 3. Klik pada file **`iOS_Duo_Status_Bar_20261004_000111.apk`** (atau file  artifact) untuk mengunduhnya langsung ke perangkat Anda.
+> 3. Klik pada file **`iOS_Duo_Status_Bar_20261004_001633.apk`** (atau file  artifact) untuk mengunduhnya langsung ke perangkat Anda.
 
 ---
 
@@ -39,9 +39,9 @@ Anda dapat mengunduh APK hasil kompilasi otomatis (*CI/CD Build*) secara langsun
 
 ## ✨ Fitur Utama
 
-* **Compact Floating Overlay**: Menampilkan bulatan status bar minimalis di sudut kanan atas layar tanpa mengganggu navigasi aplikasi lain.
-* **Real-time Battery Monitor**: Menampilkan persentase daya baterai secara akurat dan langsung terhubung dengan  Android.
-* **Wi-Fi & Cellular Signal Indicators**: Indikator ikon Wi-Fi dan 4-dot sinyal GSM bergaya khas iOS.
+* **Compact Circular Overlay**: Menampilkan bulatan status bar sempurna di sudut kanan atas layar tanpa mengganggu navigasi.
+* **Dynamic Battery Arc**: Garis busur setengah lingkaran atas melengkung secara dinamik (*0°-180°*) mengikuti sisa persentase daya baterai.
+* **Wi-Fi & Cellular Signal Indicators**: Indikator kekuatan sinyal Wi-Fi di tengah dan busur sinyal GSM di setengah lingkaran bawah.
 * **Custom Control Configuration**:
   * **X Offset Slider**: Mengatur pergeseran horizontal ikon status bar.
   * **Y Offset Slider**: Mengatur pergeseran vertikal sesuai dengan ukuran *notch* atau *punch-hole* HP.
@@ -52,14 +52,9 @@ Anda dapat mengunduh APK hasil kompilasi otomatis (*CI/CD Build*) secara langsun
 
 ## 🏗️ Arsitektur & Struktur Proyek
 
-Aplikasi ini dirancang dengan arsitektur modular yang memisahkan antara antarmuka konfigurasi, *Service* tampilan overlay, dan *BroadcastReceiver* pemantau sistem.
+Aplikasi ini dirancang dengan arsitektur modular yang memisahkan antara antarmuka konfigurasi, *Service* tampilan overlay, dan *Custom View* khusus penampil indikator.
 
 
-
-### Komponen Tampilan (XML Resources):
-* : Tampilan layout utama bulatan status bar.
-* : Shape drawable dengan border tipis elegan.
-*  & : Vector drawable independen untuk indikator sinyal.
 
 ---
 
@@ -67,41 +62,8 @@ Aplikasi ini dirancang dengan arsitektur modular yang memisahkan antara antarmuk
 
 Proyek ini sangat membutuhkan kontribusi dari pengembang Android lain untuk memperkaya fitur dan kompatibilitas perangkat!
 
-### Prasyarat Pengembangan Lokal:
-1. **JDK 17** atau yang lebih baru.
-2. **Android Studio** (Hedgehog / Jellyfish / versi lebih baru direkomendasikan).
-3. **Android SDK 34**.
-
 ### Langkah Memulai Pengembangan:
 
-
-### Alur Kontribusi (*Pull Request*):
-1. **Fork** repositori ini.
-2. Buat *feature branch* baru ().
-3. Commit perubahan Anda ().
-4. Push branch Anda ().
-5. Buka **Pull Request** ke branch .
-
----
-
-## 🗺️ Peta Jalan Fitur (Roadmap)
-
-Berikut adalah beberapa fitur yang direncanakan untuk versi mendatang (Anda sangat disarankan membantu mengerjakan poin berikut):
-
-- [ ] **Dynamic Notch Auto-alignment**: Penyesuaian otomatis posisi berdasarkan koordinat *DisplayCutout* HP.
-- [ ] **Interactive Gestures**: Aksi *double tap* atau *long press* pada overlay untuk membuka Quick Settings.
-- [ ] **Real Wi-Fi/GSM Receiver**: Pemantauan level dBm sinyal secara dinamik (*SignalStrength API*).
-- [ ] **Theme Personalization**: Pilihan warna latar belakang dan warna ikon kustom.
-- [ ] **Auto-start on Boot**: Memulai service secara otomatis saat HP baru dinyalakan ().
-
----
-
-## 🔒 Permintaan Izin (Permissions)
-
-Aplikasi ini memerlukan izin khusus berikut agar dapat berjalan dengan normal:
-* : Untuk menampilkan overlay di atas aplikasi lain.
-* : Menjaga agar tampilan overlay tidak dimatikan oleh OS.
-*  & : Untuk membaca status koneksi jaringan.
 
 ---
 
