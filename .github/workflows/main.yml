@@ -5,7 +5,7 @@ on:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
-  workflow_dispatch: # Opsi untuk menjalankan build secara manual dari web GitHub
+  workflow_dispatch:
 
 jobs:
   build:
@@ -21,20 +21,59 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Grant Execute Permission for Gradlew
-        run: chmod +x gradlew || true
+      - name: Detect Project Root & Create Settings File
+        run: |
+          # Cari folder yang memuat file build.gradle
+          BUILD_FILE=$(find . -name "build.gradle" -not -path "*/app/*" | head -n 1)
+          if [ -z "$BUILD_FILE" ]; then
+            BUILD_FILE=$(find . -name "build.gradle" | head -n 1)
+            PROJECT_DIR=$(dirname "$BUILD_FILE")/..
+          else
+            PROJECT_DIR=$(dirname "$BUILD_FILE")
+          fi
+          
+          # Bersihkan jalur relatif
+          PROJECT_DIR=$(cd "$PROJECT_DIR" && pwd)
+          echo "Lokasi project ditemukan di: $PROJECT_DIR"
+          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+
+          # Buat settings.gradle jika belum ada
+          if [ ! -f "$PROJECT_DIR/settings.gradle" ] && [ ! -f "$PROJECT_DIR/settings.gradle.kts" ]; then
+            echo "Membuat settings.gradle otomatis..."
+            echo "include ':app'" > "$PROJECT_DIR/settings.gradle"
+          fi
+
+          # Buat top-level build.gradle jika belum ada
+          if [ ! -f "$PROJECT_DIR/build.gradle" ] && [ ! -f "$PROJECT_DIR/build.gradle.kts" ]; then
+            echo "Membuat top-level build.gradle otomatis..."
+            cat << 'EOF' > "$PROJECT_DIR/build.gradle"
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.1'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10'
+    }
+}
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+EOF
+          fi
 
       - name: Build Debug APK
         run: |
-          if [ -f "./gradlew" ]; then
-            ./gradlew assembleDebug
-          else
-            gradle assembleDebug
-          fi
+          cd "$PROJECT_DIR"
+          gradle assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: iOS-Duo-StatusBar-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: "**/app/build/outputs/apk/debug/app-debug.apk"
           retention-days: 7
