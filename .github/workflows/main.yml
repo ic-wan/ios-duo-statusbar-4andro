@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "feature/*", "dev" ]
   workflow_dispatch:
 
 permissions:
@@ -65,7 +65,7 @@ jobs:
           android.nonTransitiveRClass=true
           EOF
 
-          # 4. app/build.gradle (Ditambahkan signingConfig untuk otomatis Sign APK)
+          # 4. app/build.gradle
           cat << 'EOF' > app/build.gradle
           plugins {
               id 'com.android.application'
@@ -87,7 +87,6 @@ jobs:
               buildTypes {
                   release {
                       minifyEnabled false
-                      signingConfig signingConfigs.debug
                   }
               }
               compileOptions {
@@ -646,7 +645,7 @@ jobs:
       - name: Generate Gradle Wrapper
         run: gradle wrapper --gradle-version 8.2
 
-      - name: Make Gradlew Executable & Build Signed APK
+      - name: Make Gradlew Executable & Build APK
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease
@@ -659,12 +658,12 @@ jobs:
           APK_NAME="iOS_Duo_Status_Bar_${FILE_DATE}.apk"
 
           mkdir -p release_output
-          if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
-            cp app/build/outputs/apk/release/app-release.apk release_output/${APK_NAME}
-          elif [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
-            cp app/build/outputs/apk/debug/app-debug.apk release_output/${APK_NAME}
-          else
+          if [ -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
             cp app/build/outputs/apk/release/app-release-unsigned.apk release_output/${APK_NAME}
+          elif [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
+            cp app/build/outputs/apk/release/app-release.apk release_output/${APK_NAME}
+          else
+            cp app/build/outputs/apk/debug/app-debug.apk release_output/${APK_NAME}
           fi
 
           echo "BUILD_DATE=${BUILD_DATE}" >> $GITHUB_ENV
@@ -804,7 +803,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git diff --staged --quiet || (git commit -m "docs: update comprehensive README [${{ env.BUILD_DATE }}]" && git push)
+          git diff --staged --quiet || (git commit -m "docs: update comprehensive README [${{ env.BUILD_DATE }}]" && git push origin HEAD)
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
