@@ -5,9 +5,10 @@
 > Built to be explored, improved, and extended together by the Android developer community.
 
 <!-- BUILD_META_START -->
-**Build terakhir:** belum tersedia — jalankan GitHub Actions untuk membuat artifact APK.  
-**APK artifact:** akan dibuat otomatis oleh CI.  
-**Run:** tersedia pada tab **Actions** repository.
+**Build terakhir:** `2026-10-04 02:18:21 WIB`  
+**APK artifact:** `iOS_Duo_Status_Bar_20261004_021821.apk`  
+**SHA-256:** `eb03b9924fd49dd6777b935c55251ae8091f920bd8cf18a41dc536a22518620f`  
+**Run:** https://github.com/ic-wan/ios-duo-statusbar-4andro/actions/runs/37147206833
 <!-- BUILD_META_END -->
 
 ---
