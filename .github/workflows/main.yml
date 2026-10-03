@@ -3,8 +3,6 @@ name: Build Android APK
 on:
   push:
     branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
@@ -15,65 +13,321 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up Java JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Detect Project Root & Create Settings File
+      - name: Generate Complete Android Project Structure
         run: |
-          # Cari folder yang memuat file build.gradle
-          BUILD_FILE=$(find . -name "build.gradle" -not -path "*/app/*" | head -n 1)
-          if [ -z "$BUILD_FILE" ]; then
-            BUILD_FILE=$(find . -name "build.gradle" | head -n 1)
-            PROJECT_DIR=$(dirname "$BUILD_FILE")/..
-          else
-            PROJECT_DIR=$(dirname "$BUILD_FILE")
-          fi
-          
-          # Bersihkan jalur relatif
-          PROJECT_DIR=$(cd "$PROJECT_DIR" && pwd)
-          echo "Lokasi project ditemukan di: $PROJECT_DIR"
-          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+          # 1. Buat direktori folder project
+          mkdir -p app/src/main/java/com/example/iosstatusbar
+          mkdir -p app/src/main/res/layout
 
-          # Buat settings.gradle jika belum ada
-          if [ ! -f "$PROJECT_DIR/settings.gradle" ] && [ ! -f "$PROJECT_DIR/settings.gradle.kts" ]; then
-            echo "Membuat settings.gradle otomatis..."
-            echo "include ':app'" > "$PROJECT_DIR/settings.gradle"
-          fi
+          # 2. Buat settings.gradle
+          cat << 'EOF' > settings.gradle
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "iOS Duo Status Bar"
+          include ':app'
+          EOF
 
-          # Buat top-level build.gradle jika belum ada
-          if [ ! -f "$PROJECT_DIR/build.gradle" ] && [ ! -f "$PROJECT_DIR/build.gradle.kts" ]; then
-            echo "Membuat top-level build.gradle otomatis..."
-            cat << 'EOF' > "$PROJECT_DIR/build.gradle"
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.1'
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10'
-    }
-}
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-EOF
-          fi
+          # 3. Buat root build.gradle
+          cat << 'EOF' > build.gradle
+          plugins {
+              id 'com.android.application' version '8.2.2' apply false
+              id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
+          }
+          EOF
 
-      - name: Build Debug APK
-        run: |
-          cd "$PROJECT_DIR"
-          gradle assembleDebug
+          # 4. Buat gradle.properties
+          cat << 'EOF' > gradle.properties
+          android.useAndroidX=true
+          android.nonTransitiveRClass=true
+          EOF
+
+          # 5. Buat app/build.gradle
+          cat << 'EOF' > app/build.gradle
+          plugins {
+              id 'com.android.application'
+              id 'org.jetbrains.kotlin.android'
+          }
+
+          android {
+              namespace 'com.example.iosstatusbar'
+              compileSdk 34
+
+              defaultConfig {
+                  applicationId "com.example.iosstatusbar"
+                  minSdk 24
+                  targetSdk 34
+                  versionCode 1
+                  versionName "1.0"
+              }
+
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                  }
+              }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+              kotlinOptions {
+                  jvmTarget = '17'
+              }
+          }
+
+          dependencies {
+              implementation 'androidx.core:core-ktx:1.12.0'
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+              implementation 'com.google.android.material:material:1.11.0'
+          }
+          EOF
+
+          # 6. Buat AndroidManifest.xml
+          cat << 'EOF' > app/src/main/AndroidManifest.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+              <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+              <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+              <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+              <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+              <application
+                  android:allowBackup="true"
+                  android:label="iOS Duo Status Bar"
+                  android:supportsRtl="true"
+                  android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+
+                  <activity android:name=".MainActivity" android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+
+                  <service
+                      android:name=".StatusBarOverlayService"
+                      android:enabled="true"
+                      android:exported="false" />
+              </application>
+          </manifest>
+          EOF
+
+          # 7. Buat layout_stacked_status.xml
+          cat << 'EOF' > app/src/main/res/layout/layout_stacked_status.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:padding="3dp"
+              android:gravity="center"
+              android:background="#22000000">
+
+              <ImageView
+                  android:id="@+id/imgBattery"
+                  android:layout_width="16dp"
+                  android:layout_height="9dp"
+                  android:src="@android:drawable/ic_lock_idle_low_battery" />
+
+              <ImageView
+                  android:id="@+id/imgWifi"
+                  android:layout_width="12dp"
+                  android:layout_height="9dp"
+                  android:layout_marginTop="1dp"
+                  android:src="@android:drawable/ic_dialog_alert" />
+
+              <ImageView
+                  android:id="@+id/imgCellular"
+                  android:layout_width="12dp"
+                  android:layout_height="9dp"
+                  android:layout_marginTop="1dp"
+                  android:src="@android:drawable/ic_menu_call" />
+
+          </LinearLayout>
+          EOF
+
+          # 8. Buat MainActivity.kt
+          cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/MainActivity.kt
+          package com.example.iosstatusbar
+
+          import android.content.Intent
+          import android.net.Uri
+          import android.os.Build
+          import android.os.Bundle
+          import android.provider.Settings
+          import android.widget.Button
+          import android.widget.Toast
+          import androidx.appcompat.app.AppCompatActivity
+
+          class MainActivity : AppCompatActivity() {
+
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+                  
+                  val button = Button(this).apply {
+                      text = "Aktifkan iOS Duo Status Bar"
+                      setOnClickListener { checkOverlayPermission() }
+                  }
+                  setContentView(button)
+              }
+
+              private fun checkOverlayPermission() {
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+                      val intent = Intent(
+                          Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                          Uri.parse("package:$packageName")
+                      )
+                      startActivityForResult(intent, 1234)
+                  } else {
+                      startStatusService()
+                  }
+              }
+
+              private fun startStatusService() {
+                  val intent = Intent(this, StatusBarOverlayService::class.java)
+                  startService(intent)
+                  Toast.makeText(this, "Status bar iOS Duo aktif!", Toast.LENGTH_SHORT).show()
+              }
+          }
+          EOF
+
+          # 9. Buat StatusBarOverlayService.kt
+          cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/StatusBarOverlayService.kt
+          package com.example.iosstatusbar
+
+          import android.app.Service
+          import android.content.Intent
+          import android.graphics.PixelFormat
+          import android.os.Build
+          import android.os.IBinder
+          import android.view.Gravity
+          import android.view.LayoutInflater
+          import android.view.View
+          import android.view.WindowManager
+          import android.widget.ImageView
+
+          class StatusBarOverlayService : Service() {
+
+              private lateinit var windowManager: WindowManager
+              private lateinit var overlayView: View
+              private lateinit var monitor: SystemStatusMonitor
+
+              override fun onCreate() {
+                  super.onCreate()
+                  windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+
+                  overlayView = LayoutInflater.from(this).inflate(R.layout.layout_stacked_status, null)
+
+                  val layoutParamsType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                      WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                  } else {
+                      @Suppress("DEPRECATION")
+                      WindowManager.LayoutParams.TYPE_PHONE
+                  }
+
+                  val params = WindowManager.LayoutParams(
+                      WindowManager.LayoutParams.WRAP_CONTENT,
+                      WindowManager.LayoutParams.WRAP_CONTENT,
+                      layoutParamsType,
+                      WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                              WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                              WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                      PixelFormat.TRANSLUCENT
+                  ).apply {
+                      gravity = Gravity.TOP or Gravity.END
+                      x = 24
+                      y = 12
+                  }
+
+                  windowManager.addView(overlayView, params)
+
+                  monitor = SystemStatusMonitor(this) { pct, isCharging ->
+                      val imgBattery = overlayView.findViewById<ImageView>(R.id.imgBattery)
+                      imgBattery.alpha = if (isCharging) 1.0f else 0.8f
+                  }
+                  monitor.start()
+              }
+
+              override fun onDestroy() {
+                  super.onDestroy()
+                  if (::overlayView.isInitialized) windowManager.removeView(overlayView)
+                  if (::monitor.isInitialized) monitor.stop()
+              }
+
+              override fun onBind(intent: Intent?): IBinder? = null
+          }
+          EOF
+
+          # 10. Buat SystemStatusMonitor.kt
+          cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/SystemStatusMonitor.kt
+          package com.example.iosstatusbar
+
+          import android.content.BroadcastReceiver
+          import android.content.Context
+          import android.content.Intent
+          import android.content.IntentFilter
+          import android.os.BatteryManager
+
+          class SystemStatusMonitor(
+              private val context: Context,
+              private val onStatusChanged: (batteryPct: Int, isCharging: Boolean) -> Unit
+          ) {
+              private val batteryReceiver = object : BroadcastReceiver() {
+                  override fun onReceive(ctx: Context?, intent: Intent?) {
+                      intent?.let {
+                          val level = it.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+                          val scale = it.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+                          val status = it.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+
+                          val pct = if (level != -1 && scale != -1) (level * 100 / scale.toFloat()).toInt() else 0
+                          val charging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                                         status == BatteryManager.BATTERY_STATUS_FULL
+
+                          onStatusChanged(pct, charging)
+                      }
+                  }
+              }
+
+              fun start() {
+                  val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+                  context.registerReceiver(batteryReceiver, filter)
+              }
+
+              fun stop() {
+                  try {
+                      context.unregisterReceiver(batteryReceiver)
+                  } catch (_: Exception) {}
+              }
+          }
+          EOF
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build APK
+        run: gradle assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: iOS-Duo-StatusBar-APK
-          path: "**/app/build/outputs/apk/debug/app-debug.apk"
-          retention-days: 7
+          path: app/build/outputs/apk/debug/app-debug.apk
