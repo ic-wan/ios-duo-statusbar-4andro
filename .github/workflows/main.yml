@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Java JDK 17
         uses: actions/setup-java@v4
@@ -100,61 +102,62 @@ jobs:
           }
           EOF
 
-          # 6. Background Capsule iOS (bg_ios_capsule.xml)
+          # 6. Background Capsule Transparan (bg_ios_capsule.xml)
           cat << 'EOF' > app/src/main/res/drawable/bg_ios_capsule.xml
           <?xml version="1.0" encoding="utf-8"?>
           <shape xmlns:android="http://schemas.android.com/apk/res/android"
               android:shape="rectangle">
-              <corners android:radius="8dp" />
-              <solid android:color="#66000000" />
-              <padding
-                  android:bottom="3dp"
-                  android:left="5dp"
-                  android:right="5dp"
-                  android:top="3dp" />
+              <corners android:radius="12dp" />
+              <solid android:color="#77000000" />
           </shape>
           EOF
 
           # 7. Vector Icon Baterai iOS (ic_ios_battery.xml)
           cat << 'EOF' > app/src/main/res/drawable/ic_ios_battery.xml
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="18dp"
+              android:width="20dp"
               android:height="10dp"
               android:viewportWidth="22"
-              android:viewportHeight="12">
+              android:viewportHeight="11">
               <path
                   android:fillColor="#FFFFFF"
-                  android:pathData="M2,2 h15 a2,2 0 0 1 2,2 v4 a2,2 0 0 1 -2,2 h-15 a2,2 0 0 1 -2,-2 v-4 a2,2 0 0 1 2,-2 z M20,4.5 v3 a1,1 0 0 0 1,-1 v-1 a1,1 0 0 0 -1,-1 z M3,3.5 v5 h10 v-5 z"/>
+                  android:pathData="M 2,1 C 0.9,1 0,1.9 0,3 L 0,8 C 0,9.1 0.9,10 2,10 L 17,10 C 18.1,10 19,9.1 19,8 L 19,3 C 19,1.9 18.1,1 17,1 L 2,1 Z M 2,2 L 17,2 C 17.6,2 18,2.4 18,3 L 18,8 C 18,8.6 17.6,9 17,9 L 2,9 C 1.4,9 1,8.6 1,8 L 1,3 C 1,2.4 1.4,2 2,2 Z"/>
+              <path
+                  android:fillColor="#FFFFFF"
+                  android:pathData="M 3,3 L 14,3 C 14.5,3 15,3.5 15,4 L 15,7 C 15,7.5 14.5,8 14,8 L 3,8 C 2.5,8 2,7.5 2,7 L 2,4 C 2,3.5 2.5,3 3,3 Z"/>
+              <path
+                  android:fillColor="#FFFFFF"
+                  android:pathData="M 20,4 C 20.6,4 21,4.4 21,5 L 21,6 C 21,6.6 20.6,7 20,7 L 20,4 Z"/>
           </vector>
           EOF
 
           # 8. Vector Icon Wi-Fi iOS (ic_ios_wifi.xml)
           cat << 'EOF' > app/src/main/res/drawable/ic_ios_wifi.xml
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="13dp"
-              android:height="10dp"
-              android:viewportWidth="24"
-              android:viewportHeight="24">
+              android:width="12dp"
+              android:height="9dp"
+              android:viewportWidth="16"
+              android:viewportHeight="12">
               <path
                   android:fillColor="#FFFFFF"
-                  android:pathData="M12,18 a2,2 0 1,1 0,4 a2,2 0 0,1 0,-4 z M4.93,12.93 a1,1 0 0,1 1.41,0 a8,8 0 0,1 11.32,0 a1,1 0 1,1 -1.41,1.41 a6,6 0 0,0 -8.49,0 a1,1 0 0,1 -1.41,-1.41 z M1.39,9.39 a1,1 0 0,1 1.41,0 a13,13 0 0,1 18.38,0 a1,1 0 1,1 -1.41,1.41 a11,11 0 0,0 -15.56,0 a1,1 0 0,1 -1.41,-1.41 z"/>
+                  android:pathData="M 8,9.5 C 8.83,9.5 9.5,10.17 9.5,11 C 9.5,11.83 8.83,12.5 8,12.5 C 7.17,12.5 6.5,11.83 6.5,11 C 6.5,10.17 7.17,9.5 8,9.5 Z M 4.81,7.31 C 6.57,5.55 9.43,5.55 11.19,7.31 C 11.58,7.7 12.21,7.7 12.6,7.31 C 12.99,6.92 12.99,6.29 12.6,5.9 C 10.06,3.36 5.94,3.36 3.4,5.9 C 3.01,6.29 3.01,6.92 3.4,7.31 C 3.79,7.7 4.42,7.7 4.81,7.31 Z M 2.1,4.6 C 5.36,1.34 10.64,1.34 13.9,4.6 C 14.29,4.99 14.92,4.99 15.31,4.6 C 15.7,4.21 15.7,3.58 15.31,3.19 C 11.27,-0.85 4.73,-0.85 0.69,3.19 C 0.3,3.58 0.3,4.21 0.69,4.6 C 1.08,4.99 1.71,4.99 2.1,4.6 Z"/>
           </vector>
           EOF
 
           # 9. Vector Icon Seluler iOS (ic_ios_cellular.xml)
           cat << 'EOF' > app/src/main/res/drawable/ic_ios_cellular.xml
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="13dp"
-              android:height="10dp"
-              android:viewportWidth="24"
-              android:viewportHeight="24">
+              android:width="12dp"
+              android:height="9dp"
+              android:viewportWidth="16"
+              android:viewportHeight="12">
               <path
                   android:fillColor="#FFFFFF"
-                  android:pathData="M3,16 h2 v5 h-2 z M8,12 h2 v9 h-2 z M13,8 h2 v13 h-2 z M18,4 h2 v17 h-2 z"/>
+                  android:pathData="M 1,9 C 1.55,9 2,9.45 2,10 L 2,11 C 2,11.55 1.55,12 1,12 C 0.45,12 0,11.55 0,11 L 0,10 C 0,9.45 0.45,9 1,9 Z M 5,6 C 5.55,6 6,6.45 6,7 L 6,11 C 6,11.55 5.55,12 5,12 C 4.45,12 4,11.55 4,11 L 4,7 C 4,6.45 4.45,6 5,6 Z M 9,3 C 9.55,3 10,3.45 10,4 L 10,11 C 10,11.55 9.55,12 9,12 C 8.45,12 8,11.55 8,11 L 8,4 C 8,3.45 8.45,3 9,3 Z M 13,0 C 13.55,0 14,0.45 14,1 L 14,11 C 14,11.55 13.55,12 13,12 C 12.45,12 12,11.55 12,11 L 12,1 C 12,0.45 12.45,0 13,0 Z"/>
           </vector>
           EOF
 
-          # 10. layout_stacked_status.xml
+          # 10. Layout Duo Tumpuk Presisi (layout_stacked_status.xml)
           cat << 'EOF' > app/src/main/res/layout/layout_stacked_status.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -162,32 +165,171 @@ jobs:
               android:layout_height="wrap_content"
               android:background="@drawable/bg_ios_capsule"
               android:gravity="center"
-              android:orientation="vertical">
+              android:orientation="vertical"
+              android:paddingHorizontal="6dp"
+              android:paddingVertical="3dp">
 
+              <!-- Baris Atas: Baterai -->
               <ImageView
                   android:id="@+id/imgBattery"
-                  android:layout_width="16dp"
+                  android:layout_width="18dp"
                   android:layout_height="9dp"
                   android:src="@drawable/ic_ios_battery" />
 
-              <ImageView
-                  android:id="@+id/imgWifi"
-                  android:layout_width="13dp"
-                  android:layout_height="9dp"
+              <!-- Baris Bawah: Wi-Fi & Seluler Berdampingan (Stacked Duo) -->
+              <LinearLayout
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
                   android:layout_marginTop="2dp"
-                  android:src="@drawable/ic_ios_wifi" />
+                  android:gravity="center"
+                  android:orientation="horizontal">
 
-              <ImageView
-                  android:id="@+id/imgCellular"
-                  android:layout_width="13dp"
-                  android:layout_height="9dp"
-                  android:layout_marginTop="2dp"
-                  android:src="@drawable/ic_ios_cellular" />
+                  <ImageView
+                      android:id="@+id/imgWifi"
+                      android:layout_width="10dp"
+                      android:layout_height="8dp"
+                      android:layout_marginEnd="3dp"
+                      android:src="@drawable/ic_ios_wifi" />
+
+                  <ImageView
+                      android:id="@+id/imgCellular"
+                      android:layout_width="10dp"
+                      android:layout_height="8dp"
+                      android:src="@drawable/ic_ios_cellular" />
+              </LinearLayout>
 
           </LinearLayout>
           EOF
 
-          # 11. AndroidManifest.xml
+          # 11. Activity Main Layout (activity_main.xml)
+          cat << 'EOF' > app/src/main/res/layout/activity_main.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:padding="20dp">
+
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical">
+
+                  <TextView
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="iOS Duo Status Bar"
+                      android:textSize="22sp"
+                      android:textStyle="bold"
+                      android:textColor="#000000" />
+
+                  <TextView
+                      android:id="@+id/tvStatus"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="8dp"
+                      android:text="Status: Nonaktif"
+                      android:textSize="14sp"
+                      android:textColor="#777777" />
+
+                  <!-- Control Buttons: Start & Stop -->
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="20dp"
+                      android:orientation="horizontal">
+
+                      <Button
+                          android:id="@+id/btnStart"
+                          android:layout_width="0dp"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:layout_marginEnd="8dp"
+                          android:text="▶ Start"
+                          android:backgroundTint="#4CAF50" />
+
+                      <Button
+                          android:id="@+id/btnStop"
+                          android:layout_width="0dp"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:layout_marginStart="8dp"
+                          android:text="⏹ Stop"
+                          android:backgroundTint="#F44336" />
+                  </LinearLayout>
+
+                  <!-- Divider / Config Section -->
+                  <View
+                      android:layout_width="match_parent"
+                      android:layout_height="1dp"
+                      android:layout_marginVertical="24dp"
+                      android:background="#DDDDDD" />
+
+                  <TextView
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="⚙ Config Overlay Status Bar"
+                      android:textSize="18sp"
+                      android:textStyle="bold"
+                      android:textColor="#000000" />
+
+                  <!-- Config X -->
+                  <TextView
+                      android:id="@+id/tvLabelX"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="16dp"
+                      android:text="Posisi X Offset: 16 dp" />
+
+                  <SeekBar
+                      android:id="@+id/seekX"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:max="100"
+                      android:progress="16" />
+
+                  <!-- Config Y -->
+                  <TextView
+                      android:id="@+id/tvLabelY"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="12dp"
+                      android:text="Posisi Y Offset: 0 dp" />
+
+                  <SeekBar
+                      android:id="@+id/seekY"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:max="100"
+                      android:progress="0" />
+
+                  <!-- Config Alpha / Transparency -->
+                  <TextView
+                      android:id="@+id/tvLabelAlpha"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="12dp"
+                      android:text="Opasitas / Transparansi: 100%" />
+
+                  <SeekBar
+                      android:id="@+id/seekAlpha"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:max="100"
+                      android:progress="100" />
+
+                  <Button
+                      android:id="@+id/btnApply"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="20dp"
+                      android:text="💾 Simpan &amp; Terapkan Config"
+                      android:backgroundTint="#2196F3" />
+
+              </LinearLayout>
+          </ScrollView>
+          EOF
+
+          # 12. AndroidManifest.xml
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -219,32 +361,83 @@ jobs:
           </manifest>
           EOF
 
-          # 12. MainActivity.kt
+          # 13. MainActivity.kt
           cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/MainActivity.kt
           package com.example.iosstatusbar
 
+          import android.content.Context
           import android.content.Intent
           import android.net.Uri
           import android.os.Build
           import android.os.Bundle
           import android.provider.Settings
           import android.widget.Button
+          import android.widget.SeekBar
+          import android.widget.TextView
           import android.widget.Toast
           import androidx.appcompat.app.AppCompatActivity
 
           class MainActivity : AppCompatActivity() {
 
+              private lateinit var tvStatus: TextView
+              private lateinit var seekX: SeekBar
+              private lateinit var seekY: SeekBar
+              private lateinit var seekAlpha: SeekBar
+              private lateinit var tvLabelX: TextView
+              private lateinit var tvLabelY: TextView
+              private lateinit var tvLabelAlpha: TextView
+
               override fun onCreate(savedInstanceState: Bundle?) {
                   super.onCreate(savedInstanceState)
-                  
-                  val button = Button(this).apply {
-                      text = "Aktifkan iOS Duo Status Bar"
-                      setOnClickListener { checkOverlayPermission() }
-                  }
-                  setContentView(button)
+                  setContentView(R.layout.activity_main)
+
+                  tvStatus = findViewById(R.id.tvStatus)
+                  seekX = findViewById(R.id.seekX)
+                  seekY = findViewById(R.id.seekY)
+                  seekAlpha = findViewById(R.id.seekAlpha)
+                  tvLabelX = findViewById(R.id.tvLabelX)
+                  tvLabelY = findViewById(R.id.tvLabelY)
+                  tvLabelAlpha = findViewById(R.id.tvLabelAlpha)
+
+                  val btnStart = findViewById<Button>(R.id.btnStart)
+                  val btnStop = findViewById<Button>(R.id.btnStop)
+                  val btnApply = findViewById<Button>(R.id.btnApply)
+
+                  val prefs = getSharedPreferences("ios_prefs", Context.MODE_PRIVATE)
+                  val posX = prefs.getInt("pos_x", 16)
+                  val posY = prefs.getInt("pos_y", 0)
+                  val alphaVal = prefs.getInt("alpha", 100)
+
+                  seekX.progress = posX
+                  seekY.progress = posY
+                  seekAlpha.progress = alphaVal
+
+                  updateLabels(posX, posY, alphaVal)
+
+                  seekX.setOnSeekBarChangeListener(createSeekListener())
+                  seekY.setOnSeekBarChangeListener(createSeekListener())
+                  seekAlpha.setOnSeekBarChangeListener(createSeekListener())
+
+                  btnStart.setOnClickListener { checkOverlayAndStart() }
+                  btnStop.setOnClickListener { stopStatusService() }
+                  btnApply.setOnClickListener { saveAndApplyConfig() }
               }
 
-              private fun checkOverlayPermission() {
+              private fun createSeekListener() = object : SeekBar.OnSeekBarChangeListener {
+                  override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
+                      updateLabels(seekX.progress, seekY.progress, seekAlpha.progress)
+                  }
+                  override fun onStartTrackingTouch(sb: SeekBar?) {}
+                  override fun onStopTrackingTouch(sb: SeekBar?) {}
+              }
+
+              private fun updateLabels(x: Int, y: Int, alpha: Int) {
+                  tvLabelX.text = "Posisi X Offset: $x dp"
+                  tvLabelY.text = "Posisi Y Offset: $y dp"
+                  tvLabelAlpha.text = "Opasitas / Transparansi: $alpha%"
+              }
+
+              private fun checkOverlayAndStart() {
                   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
                       val intent = Intent(
                           Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -257,18 +450,46 @@ jobs:
               }
 
               private fun startStatusService() {
+                  saveConfig()
                   val intent = Intent(this, StatusBarOverlayService::class.java)
                   startService(intent)
-                  Toast.makeText(this, "Status bar iOS Duo aktif!", Toast.LENGTH_SHORT).show()
+                  tvStatus.text = "Status: Aktif"
+                  Toast.makeText(this, "Status bar iOS Duo diaktifkan!", Toast.LENGTH_SHORT).show()
+              }
+
+              private fun stopStatusService() {
+                  val intent = Intent(this, StatusBarOverlayService::class.java)
+                  stopService(intent)
+                  tvStatus.text = "Status: Nonaktif"
+                  Toast.makeText(this, "Status bar iOS Duo dihentikan!", Toast.LENGTH_SHORT).show()
+              }
+
+              private fun saveConfig() {
+                  val prefs = getSharedPreferences("ios_prefs", Context.MODE_PRIVATE)
+                  prefs.edit()
+                      .putInt("pos_x", seekX.progress)
+                      .putInt("pos_y", seekY.progress)
+                      .putInt("alpha", seekAlpha.progress)
+                      .apply()
+              }
+
+              private fun saveAndApplyConfig() {
+                  saveConfig()
+                  val intent = Intent(this, StatusBarOverlayService::class.java).apply {
+                      action = StatusBarOverlayService.ACTION_UPDATE
+                  }
+                  startService(intent)
+                  Toast.makeText(this, "Config berhasil disimpan dan diterapkan!", Toast.LENGTH_SHORT).show()
               }
           }
           EOF
 
-          # 13. StatusBarOverlayService.kt
+          # 14. StatusBarOverlayService.kt
           cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/StatusBarOverlayService.kt
           package com.example.iosstatusbar
 
           import android.app.Service
+          import android.content.Context
           import android.content.Intent
           import android.graphics.PixelFormat
           import android.os.Build
@@ -284,11 +505,11 @@ jobs:
               private lateinit var windowManager: WindowManager
               private lateinit var overlayView: View
               private lateinit var monitor: SystemStatusMonitor
+              private var params: WindowManager.LayoutParams? = null
 
               override fun onCreate() {
                   super.onCreate()
                   windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-
                   overlayView = LayoutInflater.from(this).inflate(R.layout.layout_stacked_status, null)
 
                   val layoutParamsType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -298,20 +519,20 @@ jobs:
                       WindowManager.LayoutParams.TYPE_PHONE
                   }
 
-                  val params = WindowManager.LayoutParams(
+                  params = WindowManager.LayoutParams(
                       WindowManager.LayoutParams.WRAP_CONTENT,
                       WindowManager.LayoutParams.WRAP_CONTENT,
                       layoutParamsType,
                       WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                               WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-                              WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                              WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                              WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                       PixelFormat.TRANSLUCENT
                   ).apply {
                       gravity = Gravity.TOP or Gravity.END
-                      x = 18
-                      y = 8
                   }
 
+                  applyPreferences()
                   windowManager.addView(overlayView, params)
 
                   monitor = SystemStatusMonitor(this) { pct, isCharging ->
@@ -321,17 +542,42 @@ jobs:
                   monitor.start()
               }
 
+              override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+                  if (intent?.action == ACTION_UPDATE) {
+                      applyPreferences()
+                      params?.let { windowManager.updateViewLayout(overlayView, it) }
+                  }
+                  return START_STICKY
+              }
+
+              private fun applyPreferences() {
+                  val prefs = getSharedPreferences("ios_prefs", Context.MODE_PRIVATE)
+                  val posX = prefs.getInt("pos_x", 16)
+                  val posY = prefs.getInt("pos_y", 0)
+                  val alphaVal = prefs.getInt("alpha", 100)
+
+                  params?.x = posX
+                  params?.y = posY
+                  overlayView.alpha = alphaVal / 100f
+              }
+
               override fun onDestroy() {
                   super.onDestroy()
-                  if (::overlayView.isInitialized) windowManager.removeView(overlayView)
+                  if (::overlayView.isInitialized) {
+                      try { windowManager.removeView(overlayView) } catch (_: Exception) {}
+                  }
                   if (::monitor.isInitialized) monitor.stop()
               }
 
               override fun onBind(intent: Intent?): IBinder? = null
+
+              companion object {
+                  const val ACTION_UPDATE = "com.example.iosstatusbar.UPDATE_CONFIG"
+              }
           }
           EOF
 
-          # 14. SystemStatusMonitor.kt
+          # 15. SystemStatusMonitor.kt
           cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/SystemStatusMonitor.kt
           package com.example.iosstatusbar
 
@@ -382,30 +628,36 @@ jobs:
       - name: Build APK with Gradle Wrapper
         run: ./gradlew assembleDebug
 
-      - name: Get Clean Date String
-        id: get_date
-        run: echo "DATE=$(date +\%Y-\%m-\%d)" >> $GITHUB_ENV
+      - name: Get Date and Time String (YYYY-MM-DD_HH-MM)
+        id: timestamp
+        run: echo "TIMESTAMP=$(date +%Y-%m-%d_%H-%M)" >> $GITHUB_ENV
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: iOS-Duo-StatusBar-${{ env.DATE }}
+          name: iOS-Duo-StatusBar-${{ env.TIMESTAMP }}
           path: app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Update README.md on Build Success
+      - name: Update README.md and Changelog on Build Success
         if: success()
         run: |
+          COMMIT_MSG=$(git log -1 --pretty=format:"%s")
+          BUILD_TIME=$(date +"%Y-%m-%d %H:%M:%S UTC")
+          FILE_VER="iOS-Duo-StatusBar-${{ env.TIMESTAMP }}"
+
           cat << EOF > README.md
           # iOS Duo Status Bar for Android 📱
 
-          Aplikasi Android untuk menampilkan modul overlay status bar gaya **iOS Duo**, di mana ikon **Baterai**, **Wi-Fi**, dan **Sinyal Seluler** ditumpuk secara vertikal dalam satu grup visual tanpa memerlukan akses Root.
+          Aplikasi Android untuk menampilkan modul overlay status bar gaya **iOS Duo**, di mana ikon **Baterai**, **Wi-Fi**, dan **Sinyal Seluler** ditumpuk secara vertikal/kompakt dalam satu kapsul visual tanpa memerlukan akses Root.
 
           ---
 
           ## 🌟 Fitur Utama
-          - **Stacked Status Bar Icons**: Ikon Baterai, Wi-Fi, dan Seluler disusun menumpuk secara vertikal ala iOS Duo.
-          - **Tanpa Root**: Menggunakan \`WindowManager\` (\`TYPE_APPLICATION_OVERLAY\`) sehingga dapat berjalan di semua perangkat Android (Android 7.0 / SDK 24+).
-          - **Real-Time System Monitoring**: Memantau status persentase dan pengisian daya baterai secara langsung menggunakan \`BroadcastReceiver\`.
+          - **Stacked Duo Icons**: Ikon Baterai di posisi atas, Wi-Fi dan Sinyal Seluler berdampingan di bawahnya ala iOS Duo.
+          - **Tombol Start & Stop**: Tombol sakelar utama untuk mengaktifkan dan mematikan overlay service kapan saja.
+          - **Panel Config Overlay**: Pengaturan posisi X (horizontal), posisi Y (vertikal), dan transparansi secara *real-time*.
+          - **Direct Status Bar Overlay**: Menggunakan \`FLAG_LAYOUT_NO_LIMITS\` untuk menempel langsung di area status bar utama.
+          - **Tanpa Root**: Menggunakan \`WindowManager\` (\`TYPE_APPLICATION_OVERLAY\`) yang dapat berjalan di Android 7.0 (SDK 24+).
 
           ---
 
@@ -413,19 +665,11 @@ jobs:
 
           Aplikasi ini dibangun menggunakan arsitektur native Android (Kotlin) dan dikompilasi secara otomatis menggunakan **GitHub Actions CI/CD Pipeline**.
 
-          ### 1. Komponen Aplikasi
-          * **\`MainActivity.kt\`**: Memeriksa dan meminta izin akses overlay (\`SYSTEM_ALERT_WINDOW\`) dari pengguna.
-          * **\`StatusBarOverlayService.kt\`**: Service yang merender layout tumpuk di atas status bar sistem menggunakan \`WindowManager\`.
-          * **\`SystemStatusMonitor.kt\`**: Memantau perubahan status baterai dan konektivitas secara *real-time*.
-          * **\`layout_stacked_status.xml\`**: Layout UI vertikal (\`LinearLayout\`) tempat penumpukan ikon Baterai, Wi-Fi, dan Seluler.
-          * **Vector Drawables**: Aset ikon tumpuk bergaya Vektor iOS (\`ic_ios_battery.xml\`, \`ic_ios_wifi.xml\`, \`ic_ios_cellular.xml\`, \`bg_ios_capsule.xml\`).
-
-          ### 2. Pipeline Kompilasi Otomatis (CI/CD)
-          Proses pengerjaan dan *build* dilakukan otomatis melalui skrip \`.github/workflows/main.yml\`:
-          1. **Environment**: Linux Ubuntu dengan Java JDK 17.
-          2. **Build Tool**: Gradle 8.5 via Gradle Wrapper & Android Gradle Plugin (AGP) 8.2.2.
-          3. **Trigger**: Memicu kompilasi otomatis setiap ada \`push\` ke branch \`main\`/\`master\` atau dijalankan secara manual (\`workflow_dispatch\`).
-          4. **Penamaan Dinamis**: Setiap artifact yang dihasilkan secara otomatis diberi penamaan berdasarkan tanggal kompilasi (\`iOS-Duo-StatusBar-YYYY-MM-DD\`).
+          ### 1. Komponen Utama
+          * **\`MainActivity.kt\`**: Tampilan UI utama dengan tombol **Start**, **Stop**, dan slider **Config**.
+          * **\`StatusBarOverlayService.kt\`**: Service pelapis status bar yang merespons perubahan konfigurasi.
+          * **\`activity_main.xml\`**: Layout panel kontrol aplikasi.
+          * **\`layout_stacked_status.xml\`**: Layout penumpukan bertingkat dua baris (Baterai & Wi-Fi/Seluler).
 
           ---
 
@@ -435,24 +679,29 @@ jobs:
 
           👉 **[Link ke Halaman Artifacts / Build Terbaru](../../actions)**
 
-          ### Penamaan Artifact Rilis:
-          * **Build Terakhir Berhasil**: \`iOS-Duo-StatusBar-${{ env.DATE }}\`
-          * **Rilis Berikutnya**: Setiap *build* baru yang berhasil akan secara otomatis memperbarui README ini dan dinamai \`iOS-Duo-StatusBar-YYYY-MM-DD\` sesuai tanggal pembuatan.
+          * **Versi APK Terakhir**: \`${FILE_VER}\`
+
+          ---
+
+          ## 📋 Changelog (Catatan Perubahan Versi)
+
+          | Versi File | Tanggal & Jam Build | Catatan Perubahan (Commit) | Status |
+          | :--- | :--- | :--- | :--- |
+          | **\`${FILE_VER}\`** | \`${BUILD_TIME}\` | ${COMMIT_MSG} | ✅ Berhasil |
 
           ---
 
           ## 🚀 Cara Instalasi & Penggunaan
 
-          1. Masuk ke tab **[Actions](../../actions)** pada repository ini.
-          2. Klik pada riwayat *build* paling atas yang bertanda **Centang Hijau (✓)**.
-          3. Gulir ke bagian **Artifacts** di bawah halaman detail build, lalu tekan nama file artifact (\`iOS-Duo-StatusBar-${{ env.DATE }}\`) untuk mengunduhnya.
-          4. Ekstrak file \`.zip\` yang terunduh untuk mendapatkan file \`app-debug.apk\`.
-          5. Instal file \`.apk\` tersebut di HP Android Anda.
-          6. Buka aplikasi, klik tombol **Aktifkan iOS Duo Status Bar**, dan berikan izin **Tampilkan di atas aplikasi lain** (*Display over other apps*).
+          1. Buka tab **[Actions](../../actions)** pada repository ini.
+          2. Klik riwayat *build* paling atas yang bertanda **Centang Hijau (✓)**.
+          3. Unduh artifact dengan nama **\`${FILE_VER}\`**.
+          4. Ekstrak file \`.zip\` dan instal \`app-debug.apk\`.
+          5. Buka aplikasi, gunakan tombol **Start** untuk mengaktifkan status bar, tombol **Stop** untuk menonaktifkan, dan panel **Config** untuk mengatur posisi & opasitas.
           EOF
 
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git commit -m "docs: update README with latest build date [skip ci]" || echo "No changes to commit"
+          git commit -m "docs: update README and changelog for version ${FILE_VER} [skip ci]" || echo "No changes to commit"
           git push origin HEAD:${{ github.ref_name }} || echo "Push skipped"
