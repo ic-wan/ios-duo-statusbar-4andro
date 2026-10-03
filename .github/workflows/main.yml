@@ -5,197 +5,6 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Java JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Generate Android Project Source Code
-        run: |
-          mkdir -p app/src/main/java/com/example/iosstatusbar
-          mkdir -p app/src/main/res/layout
-          mkdir -p app/src/main/res/drawable
-          mkdir -p app/src/main/res/mipmap-anydpi-v26
-
-          # 1. settings.gradle
-          cat << 'EOF' > settings.gradle
-          pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          rootProject.name = "iOS Duo Status Bar"
-          include ':app'
-          EOF
-
-          # 2. build.gradle
-          cat << 'EOF' > build.gradle
-          plugins {
-              id 'com.android.application' version '8.2.2' apply false
-              id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
-          }
-          EOF
-
-          # 3. gradle.properties
-          cat << 'EOF' > gradle.properties
-          android.useAndroidX=true
-          android.nonTransitiveRClass=true
-          EOF
-
-          # 4. app/build.gradle
-          cat << 'EOF' > app/build.gradle
-          plugins {
-              id 'com.android.application'
-              id 'org.jetbrains.kotlin.android'
-          }
-
-          android {
-              namespace 'com.example.iosstatusbar'
-              compileSdk 34
-
-              defaultConfig {
-                  applicationId "com.example.iosstatusbar"
-                  minSdk 24
-                  targetSdk 34
-                  versionCode 1
-                  versionName "1.0"
-              }
-
-              buildTypes {
-                  release {
-                      minifyEnabled false
-                  }
-              }
-              compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
-              }
-              kotlinOptions {
-                  jvmTarget = '17'
-              }
-          }
-
-          dependencies {
-              implementation 'androidx.core:core-ktx:1.12.0'
-              implementation 'androidx.appcompat:appcompat:1.6.1'
-              implementation 'com.google.android.material:material:1.11.0'
-          }
-          EOF
-
-          # 5. Background Lingkaran/Oval (bg_overlay_circle.xml)
-          cat << 'EOF' > app/src/main/res/drawable/bg_overlay_circle.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <shape xmlns:android="http://schemas.android.com/apk/res/android"
-              android:shape="oval">
-              <solid android:color="#99000000" />
-              <stroke android:width="1dp" android:color="#44FFFFFF" />
-          </shape>
-          EOF
-
-          # 6. Vector Icon Wi-Fi (ic_wifi.xml)
-          cat << 'EOF' > app/src/main/res/drawable/ic_wifi.xml
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="16dp"
-              android:height="16dp"
-              android:viewportWidth="24"
-              android:viewportHeight="24">
-              <path
-                  android:fillColor="#FFFFFF"
-                  android:pathData="M12,3C7.31,3 3.07,4.9 0,8l2.83,2.83C5.14,8.5 8.41,7 12,7c3.59,0 6.86,1.5 9.17,3.83L24,8C20.93,4.9 16.69,3 12,3z M12,11c-2.39,0 -4.57,0.97 -6.17,2.54l2.83,2.83C9.74,15.42 10.82,15 12,15c1.18,0 2.26,0.42 3.34,1.37l2.83,-2.83C16.57,11.97 14.39,11 12,11z M12,18c-0.83,0 -1.5,0.67 -1.5,1.5S11.17,21 12,21s1.5,-0.67 1.5,-1.5S12.83,18 12,18z"/>
-          </vector>
-          EOF
-
-          # 7. Vector Icon Titik Sinyal GSM (ic_gsm_dots.xml)
-          cat << 'EOF' > app/src/main/res/drawable/ic_gsm_dots.xml
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="16dp"
-              android:height="6dp"
-              android:viewportWidth="24"
-              android:viewportHeight="8">
-              <path
-                  android:fillColor="#FFFFFF"
-                  android:pathData="M3,4m-2,0a2,2 0 1,0 4,0a2,2 0 1,0 -4,0 M9,4m-2,0a2,2 0 1,0 4,0a2,2 0 1,0 -4,0 M15,4m-2,0a2,2 0 1,0 4,0a2,2 0 1,0 -4,0 M21,4m-2,0a2,2 0 1,0 4,0a2,2 0 1,0 -4,0"/>
-          </vector>
-          EOF
-
-          # 8. App Launcher Icon
-          cat << 'EOF' > app/src/main/res/drawable/ic_launcher_bg.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <shape xmlns:android="http://schemas.android.com/apk/res/android"
-              android:shape="rectangle">
-              <solid android:color="#121212" />
-              <corners android:radius="24dp" />
-          </shape>
-          EOF
-
-          cat << 'EOF' > app/src/main/res/drawable/ic_launcher_fg.xml
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="108dp"
-              android:height="108dp"
-              android:viewportWidth="108"
-              android:viewportHeight="108">
-              <path
-                  android:fillColor="#222222"
-                  android:pathData="M54,18m-30,0a30,30 0 1,0 60,0a30,30 0 1,0 -60,0"/>
-              <path
-                  android:fillColor="#FFFFFF"
-                  android:pathData="M54,36C46.5,36 39.7,39 34.8,44L39.3,48.5C43.1,44.7 48.3,42.5 54,42.5C59.7,42.5 64.9,44.7 68.7,48.5L73.2,44C68.3,39 61.5,36 54,36z M54,49C49.9,49 46.1,50.7 43.4,53.4L47.9,57.9C49.5,56.4 51.6,55.5 54,55.5C56.4,55.5 58.5,56.4 60.1,57.9L64.6,53.4C61.9,50.7 58.1,49 54,49z M54,61C52.3,61 51,62.3 51,64C51,65.7 52.3,67 54,67C55.7,67 57,65.7 57,64C57,62.3 55.7,61 54,61z"/>
-              <path
-                  android:fillColor="#FFFFFF"
-                  android:pathData="M39,76m-3,0a3,3 0 1,0 6,0a3,3 0 1,0 -6,0 M49,76m-3,0a3,3 0 1,0 6,0a3,3 0 1,0 -6,0 M59,76m-3,0a3,3 0 1,0 6,0a3,3 0 1,0 -6,0 M69,76m-3,0a3,3 0 1,0 6,0a3,3 0 1,0 -6,0"/>
-          </vector>
-          EOF
-
-          cat << 'EOF' > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <adaptive-icon xmlns:android="http://schemas.android.comBerikut adalah pembaruan file **`.github/workflows/main.yml`** untuk menyelesaikan ketiga kendala tersebut:
-
-### Perbaikan Utama:
-1. **Desain Overlay Persis Seperti Gambar**:
-   - Dibuat menjadi **satu bulatan terpadu** di pojok kanan atas.
-   - Bagian atas menampilkan **angka persentase baterai** (contoh: `83`).
-   - Bagian tengah menampilkan **ikon sinyal Wi-Fi**.
-   - Bagian bawah menampilkan **4 titik indikator sinyal GSM**.
-2. **Penyesuaian Waktu ke GMT+7 (WIB / Jakarta)**:
-   - Menggunakan konfigurasi `TZ='Asia/Jakarta'` saat pembuatan nama file artifact dan pencatatan tanggal/jam kompilasi.
-3. **Perbaikan Otomatisasi Update `README.md`**:
-   - Menambahkan konfigurasi `permissions: contents: write` pada GitHub Actions agar token memiliki hak akses penuh untuk menyimpan (*commit*) dan mendorong (*push*) pembaruan file `README.md` di folder utama repository.
-
----
-
-### Kode `.github/workflows/main.yml`
-
-```yaml
-name: Build Android APK
-
-on:
-  push:
-    branches: [ "main", "master" ]
-  workflow_dispatch:
-
 permissions:
   contents: write
 
@@ -299,7 +108,7 @@ jobs:
           # 5. Background Bulatan Lingkaran (bg_status_circle.xml)
           cat << 'EOF' > app/src/main/res/drawable/bg_status_circle.xml
           <?xml version="1.0" encoding="utf-8"?>
-          <shape xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)"
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
               android:shape="oval">
               <solid android:color="#0D0D0D" />
               <stroke android:width="1dp" android:color="#33FFFFFF" />
@@ -308,7 +117,7 @@ jobs:
 
           # 6. Vector Icon Wi-Fi (ic_wifi_small.xml)
           cat << 'EOF' > app/src/main/res/drawable/ic_wifi_small.xml
-          <vector xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)"
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="14dp"
               android:height="10dp"
               android:viewportWidth="24"
@@ -321,7 +130,7 @@ jobs:
 
           # 7. Vector Icon Titik Sinyal GSM (ic_gsm_dots.xml)
           cat << 'EOF' > app/src/main/res/drawable/ic_gsm_dots.xml
-          <vector xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)"
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="14dp"
               android:height="4dp"
               android:viewportWidth="24"
@@ -335,7 +144,7 @@ jobs:
           # 8. APK Launcher Icon (ic_launcher_bg & fg)
           cat << 'EOF' > app/src/main/res/drawable/ic_launcher_bg.xml
           <?xml version="1.0" encoding="utf-8"?>
-          <shape xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)"
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
               android:shape="rectangle">
               <solid android:color="#121212" />
               <corners android:radius="22dp" />
@@ -343,7 +152,7 @@ jobs:
           EOF
 
           cat << 'EOF' > app/src/main/res/drawable/ic_launcher_fg.xml
-          <vector xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)"
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="108dp"
               android:height="108dp"
               android:viewportWidth="108"
@@ -351,7 +160,6 @@ jobs:
               <path
                   android:fillColor="#1F1F1F"
                   android:pathData="M54,20m-28,0a28,28 0 1,0 56,0a28,28 0 1,0 -56,0"/>
-              <!-- Wi-Fi Icon & Signal Dots inside Launcher Icon -->
               <path
                   android:fillColor="#FFFFFF"
                   android:pathData="M54,42c6,0 11.4,2.3 15.5,6.1l-3,3C62.8,47.6 58.6,45.8 54,45.8c-4.6,0 -8.8,1.8 -12.5,5.3l-3,-3C42.6,44.3 48,42 54,42z M54,58c1.5,0 2.8,1.3 2.8,2.8c0,1.5 -1.3,2.8 -2.8,2.8c-1.5,0 -2.8,-1.3 -2.8,-2.8c0,-1.5 1.3,-2.8 2.8,-2.8z"/>
@@ -363,7 +171,7 @@ jobs:
 
           cat << 'EOF' > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
           <?xml version="1.0" encoding="utf-8"?>
-          <adaptive-icon xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)">
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
               <background android:drawable="@drawable/ic_launcher_bg" />
               <foreground android:drawable="@drawable/ic_launcher_fg" />
           </adaptive-icon>
@@ -371,7 +179,7 @@ jobs:
 
           cat << 'EOF' > app/src/main/res/drawable/ic_launcher.xml
           <?xml version="1.0" encoding="utf-8"?>
-          <layer-list xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)">
+          <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
               <item android:drawable="@drawable/ic_launcher_bg" />
               <item android:drawable="@drawable/ic_launcher_fg" />
           </layer-list>
@@ -380,16 +188,41 @@ jobs:
           # 9. Status Bar Overlay Layout (layout_stacked_status.xml)
           cat << 'EOF' > app/src/main/res/layout/layout_stacked_status.xml
           <?xml version="1.0" encoding="utf-8"?>
-          <LinearLayout android:background="@drawable/bg_status_circle" android:gravity="center" android:layout_height="38dp" android:layout_width="34dp" android:orientation="vertical" android:paddingHorizontal="2dp" android:paddingVertical="3dp" xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)">
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="34dp"
+              android:layout_height="38dp"
+              android:background="@drawable/bg_status_circle"
+              android:gravity="center"
+              android:orientation="vertical"
+              android:paddingHorizontal="2dp"
+              android:paddingVertical="3dp">
 
               <!-- Text Persentase Baterai (Top) -->
-              <TextView android:id="@+id/tvBatteryPct" android:includeFontPadding="false" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="83" android:textColor="#FFFFFF" android:textSize="9sp" android:textStyle="bold"/>
+              <TextView
+                  android:id="@+id/tvBatteryPct"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:includeFontPadding="false"
+                  android:text="83"
+                  android:textColor="#FFFFFF"
+                  android:textSize="9sp"
+                  android:textStyle="bold" />
 
               <!-- Icon Wi-Fi (Center) -->
-              <ImageView android:id="@+id/imgWifi" android:layout_height="9dp" android:layout_marginTop="1dp" android:layout_width="12dp" android:src="@drawable/ic_wifi_small"/>
+              <ImageView
+                  android:id="@+id/imgWifi"
+                  android:layout_width="12dp"
+                  android:layout_height="9dp"
+                  android:layout_marginTop="1dp"
+                  android:src="@drawable/ic_wifi_small" />
 
               <!-- Titik Sinyal GSM (Bottom) -->
-              <ImageView android:id="@+id/imgGsmDots" android:layout_height="3dp" android:layout_marginTop="1dp" android:layout_width="12dp" android:src="@drawable/ic_gsm_dots"/>
+              <ImageView
+                  android:id="@+id/imgGsmDots"
+                  android:layout_width="12dp"
+                  android:layout_height="3dp"
+                  android:layout_marginTop="1dp"
+                  android:src="@drawable/ic_gsm_dots" />
 
           </LinearLayout>
           EOF
@@ -397,38 +230,121 @@ jobs:
           # 10. Activity Main Layout (activity_main.xml)
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
-          <ScrollView android:layout_height="match_parent" android:layout_width="match_parent" android:padding="20dp" xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)">
+          <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:padding="20dp">
 
-              <LinearLayout android:layout_height="wrap_content" android:layout_width="match_parent" android:orientation="vertical">
+              <LinearLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="vertical">
 
-                  <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="iOS Duo Status Bar" android:textColor="#000000" android:textSize="22sp" android:textStyle="bold"/>
+                  <TextView
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="iOS Duo Status Bar"
+                      android:textColor="#000000"
+                      android:textSize="22sp"
+                      android:textStyle="bold" />
 
-                  <TextView android:id="@+id/tvStatus" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:layout_width="wrap_content" android:text="Status: Nonaktif" android:textColor="#777777" android:textSize="14sp"/>
+                  <TextView
+                      android:id="@+id/tvStatus"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="8dp"
+                      android:text="Status: Nonaktif"
+                      android:textColor="#777777"
+                      android:textSize="14sp" />
 
-                  <LinearLayout android:layout_height="wrap_content" android:layout_marginTop="20dp" android:layout_width="match_parent" android:orientation="horizontal">
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="20dp"
+                      android:orientation="horizontal">
 
-                      <Button android:backgroundTint="#4CAF50" android:id="@+id/btnStart" android:layout_height="wrap_content" android:layout_marginEnd="8dp" android:layout_weight="1" android:layout_width="0dp" android:text="▶ START"/>
+                      <Button
+                          android:id="@+id/btnStart"
+                          android:layout_width="0dp"
+                          android:layout_height="wrap_content"
+                          android:layout_marginEnd="8dp"
+                          android:layout_weight="1"
+                          android:backgroundTint="#4CAF50"
+                          android:text="▶ START" />
 
-                      <Button android:backgroundTint="#F44336" android:id="@+id/btnStop" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_weight="1" android:layout_width="0dp" android:text="⏹ STOP"/>
+                      <Button
+                          android:id="@+id/btnStop"
+                          android:layout_width="0dp"
+                          android:layout_height="wrap_content"
+                          android:layout_marginStart="8dp"
+                          android:layout_weight="1"
+                          android:backgroundTint="#F44336"
+                          android:text="⏹ STOP" />
                   </LinearLayout>
 
-                  <View android:background="#DDDDDD" android:layout_height="1dp" android:layout_marginVertical="24dp" android:layout_width="match_parent"/>
+                  <View
+                      android:layout_width="match_parent"
+                      android:layout_height="1dp"
+                      android:layout_marginVertical="24dp"
+                      android:background="#DDDDDD" />
 
-                  <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="⚙ Config Overlay Status Bar" android:textColor="#000000" android:textSize="18sp" android:textStyle="bold"/>
+                  <TextView
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="⚙ Config Overlay Status Bar"
+                      android:textColor="#000000"
+                      android:textSize="18sp"
+                      android:textStyle="bold" />
 
-                  <TextView android:id="@+id/tvLabelX" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:layout_width="wrap_content" android:text="Posisi X Offset: 15 dp"/>
+                  <TextView
+                      android:id="@+id/tvLabelX"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="16dp"
+                      android:text="Posisi X Offset: 15 dp" />
 
-                  <SeekBar android:id="@+id/seekX" android:layout_height="wrap_content" android:layout_width="match_parent" android:max="100" android:progress="15"/>
+                  <SeekBar
+                      android:id="@+id/seekX"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:max="100"
+                      android:progress="15" />
 
-                  <TextView android:id="@+id/tvLabelY" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:layout_width="wrap_content" android:text="Posisi Y Offset: 0 dp"/>
+                  <TextView
+                      android:id="@+id/tvLabelY"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="12dp"
+                      android:text="Posisi Y Offset: 0 dp" />
 
-                  <SeekBar android:id="@+id/seekY" android:layout_height="wrap_content" android:layout_width="match_parent" android:max="100" android:progress="0"/>
+                  <SeekBar
+                      android:id="@+id/seekY"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:max="100"
+                      android:progress="0" />
 
-                  <TextView android:id="@+id/tvLabelAlpha" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:layout_width="wrap_content" android:text="Opasitas / Transparansi: 100%"/>
+                  <TextView
+                      android:id="@+id/tvLabelAlpha"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="12dp"
+                      android:text="Opasitas / Transparansi: 100%" />
 
-                  <SeekBar android:id="@+id/seekAlpha" android:layout_height="wrap_content" android:layout_width="match_parent" android:max="100" android:progress="100"/>
+                  <SeekBar
+                      android:id="@+id/seekAlpha"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:max="100"
+                      android:progress="100" />
 
-                  <Button android:backgroundTint="#2196F3" android:id="@+id/btnApply" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:layout_width="match_parent" android:text="💾 SIMPAN &amp; TERAPKAN CONFIG"/>
+                  <Button
+                      android:id="@+id/btnApply"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="20dp"
+                      android:backgroundTint="#2196F3"
+                      android:text="💾 SIMPAN &amp; TERAPKAN CONFIG" />
 
               </LinearLayout>
           </ScrollView>
@@ -437,7 +353,7 @@ jobs:
           # 11. AndroidManifest.xml
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)">
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
               <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
               <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -703,12 +619,12 @@ jobs:
                           val level = it.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
                           val scale = it.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
                           val status = it.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
-
-                          val pct = if (level != -1 && scale != -1) (level * 100 / scale.toFloat()).toInt() else 83
-                          val charging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-                                         status == BatteryManager.BATTERY_STATUS_FULL
-
-                          onStatusChanged(pct, charging)
+                          val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                                  status == BatteryManager.BATTERY_STATUS_FULL
+                          val batteryPct = if (level != -1 && scale != -1) {
+                              (level * 100 / scale.toFloat()).toInt()
+                          } else 0
+                          onStatusChanged(batteryPct, isCharging)
                       }
                   }
               }
@@ -726,102 +642,64 @@ jobs:
           }
           EOF
 
-      - name: Generate Gradle Wrapper 8.5
+      - name: Generate Gradle Wrapper
+        run: gradle wrapper --gradle-version 8.2
+
+      - name: Make Gradlew Executable & Build APK
         run: |
-          gradle wrapper --gradle-version 8.5
           chmod +x gradlew
+          ./gradlew assembleRelease
 
-      - name: Build APK with Gradle Wrapper
-        run: ./gradlew assembleDebug
-
-      - name: Get Date and Time String (Asia/Jakarta GMT+7)
-        id: timestamp
+      - name: Prepare Artifact and Environment Variables
         run: |
           export TZ='Asia/Jakarta'
-          echo "TIMESTAMP=$(date +%Y-%m-%d_%H-%M)" >> $GITHUB_ENV
-          echo "BUILD_TIME_WIB=$(date +'%Y-%m-%d %H:%M:%S WIB')" >> $GITHUB_ENV
+          BUILD_DATE=$(date +'%Y-%m-%d %H:%M:%S WIB')
+          FILE_DATE=$(date +'%Y%m%d_%H%M%S')
+          APK_NAME="iOS_Duo_Status_Bar_${FILE_DATE}.apk"
+
+          mkdir -p release_output
+          if [ -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
+            cp app/build/outputs/apk/release/app-release-unsigned.apk release_output/${APK_NAME}
+          elif [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
+            cp app/build/outputs/apk/release/app-release.apk release_output/${APK_NAME}
+          else
+            cp app/build/outputs/apk/debug/app-debug.apk release_output/${APK_NAME}
+          fi
+
+          echo "BUILD_DATE=${BUILD_DATE}" >> $GITHUB_ENV
+          echo "APK_NAME=${APK_NAME}" >> $GITHUB_ENV
+
+      - name: Update README.md
+        run: |
+          cat << EOF > README.md
+          # iOS Duo Status Bar
+
+          Aplikasi Android Overlay Status Bar dengan tampilan gaya iOS Duo.
+
+          ## 📱 Informasi Build Terakhir
+          - **Status Build**: ✅ Selesai
+          - **Waktu Kompilasi**: ${{ env.BUILD_DATE }}
+          - **Nama File Output**: \`${{ env.APK_NAME }}\`
+          - **Target Android**: SDK 34 (Android 14)
+          - **Min Android**: SDK 24 (Android 7.0)
+
+          ## ⚙️ Fitur Utama
+          - Bulatan overlay terpadu di pojok kanan atas.
+          - Indikator Persentase Baterai.
+          - Indikator Sinyal Wi-Fi.
+          - 4 Titik Indikator Sinyal GSM.
+          - Pengaturan Posisi X/Y Offset & Opasitas/Transparansi secara interaktif.
+          EOF
+
+      - name: Commit & Push README Update
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --staged --quiet || (git commit -m "docs: update build status [${{ env.BUILD_DATE }}]" && git push)
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: iOS-Duo-StatusBar-${{ env.TIMESTAMP }}
-          path: app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Update Cumulative README.md & Changelog
-        if: success()
-        env:
-          FILE_VER: "iOS-Duo-StatusBar-${{ env.TIMESTAMP }}"
-          RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          BUILD_TIME_WIB: "${{ env.BUILD_TIME_WIB }}"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          python3 -c "
-          import os
-
-          file_ver = os.environ['FILE_VER']
-          run_url = os.environ['RUN_URL']
-          build_time = os.environ['BUILD_TIME_WIB']
-          commit_msg = os.popen('git log -1 --pretty=format:\"%s\"').read().strip().replace('|', '-')
-
-          new_row = f'| **[{file_ver}]({run_url})** | `{build_time}` | {commit_msg} | ✅ Berhasil |'
-
-          readme_path = 'README.md'
-          base_readme = f'''# iOS Duo Status Bar for Android 📱
-
-          Aplikasi Android untuk menampilkan modul status bar gaya **iOS Duo** dalam bentuk bulatan terpadu berisi angka baterai, ikon Wi-Fi, dan indikator sinyal GSM.
-
-          ---
-
-          ## 🌟 Fitur Utama
-          - **Integrated Circular Status Badge**: Bulatan terpadu berisi persentase baterai di atas, ikon Wi-Fi di tengah, serta titik sinyal GSM di bawah.
-          - **Waktu GMT+7 (WIB)**: Penamaan artifact dan log kompilasi disesuaikan dengan zona waktu Jakarta, Indonesia.
-          - **Custom APK Launcher Icon**: Ikon aplikasi disesuaikan dengan tampilan visual modul overlay.
-          - **Kontrol Fast Switch**: Tombol Start, Stop, dan pengatur posisi offset live.
-
-          ---
-
-          ## 📦 Unduh APK & Artifacts Terbaru
-
-          👉 **[Klik Di Sini Untuk Halaman Download / Artifacts Run Terbaru]({run_url})**
-
-          ---
-
-          ## 📋 Changelog (Catatan Perubahan Setiap Versi)
-
-          | Versi File / Artifact | Tanggal & Jam Build (WIB) | Catatan Perubahan (Commit) | Status |
-          | :--- | :--- | :--- | :--- |
-          {new_row}
-
-          ---
-
-          ## 🚀 Cara Instalasi & Penggunaan
-
-          1. Masuk ke tab **Actions** atau klik link tautan download di atas.
-          2. Unduh file artifact zip (**{file_ver}**).
-          3. Ekstrak file \`.zip\` dan instal \`app-debug.apk\`.
-          4. Buka aplikasi, jalankan tombol **START**, dan atur posisi offset via slider **Config**.
-          '''
-
-          if not os.path.exists(readme_path):
-              with open(readme_path, 'w') as f:
-                  f.write(base_readme)
-          else:
-              with open(readme_path, 'r') as f:
-                  content = f.read()
-              
-              table_header = '| :--- | :--- | :--- | :--- |'
-              if table_header in content:
-                  parts = content.split(table_header)
-                  updated_content = parts[0] + table_header + '\n' + new_row + parts[1]
-                  with open(readme_path, 'w') as f:
-                      f.write(updated_content)
-              else:
-                  with open(readme_path, 'w') as f:
-                      f.write(base_readme)
-          "
-
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md
-          git commit -m "docs: update README and cumulative changelog for ${FILE_VER} [skip ci]" || echo "No changes to commit"
-          git push origin HEAD:${{ github.ref_name }}
+          name: ${{ env.APK_NAME }}
+          path: release_output/*.apk
