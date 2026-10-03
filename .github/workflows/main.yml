@@ -150,7 +150,7 @@ jobs:
           </layer-list>
           EOF
 
-          # 6. Adaptive Custom View (CircularStatusView.kt)
+          # 6. Ultra-Crisp Custom Canvas View (CircularStatusView.kt)
           cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/CircularStatusView.kt
           package com.example.iosstatusbar
 
@@ -165,7 +165,7 @@ jobs:
               defStyleAttr: Int = 0
           ) : View(context, attrs, defStyleAttr) {
 
-              var batteryPct: Int = 83
+              var batteryPct: Int = 62
                   set(value) {
                       field = value.coerceIn(0, 100)
                       invalidate()
@@ -189,26 +189,37 @@ jobs:
                       invalidate()
                   }
 
-              // Paint untuk Penegas Kontras Latar Belakang (Adaptive Dark Halo)
-              private val shadowStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                  color = Color.parseColor("#CC000000")
+              // Paints untuk Kontras Tinggi (High Contrast Dark Halo Shadow)
+              private val shadowTrackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                  color = Color.parseColor("#90000000")
                   style = Paint.Style.STROKE
                   strokeCap = Paint.Cap.ROUND
               }
 
-              private val mainStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+              private val dimTrackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                  color = Color.parseColor("#40FFFFFF")
+                  style = Paint.Style.STROKE
+                  strokeCap = Paint.Cap.ROUND
+              }
+
+              private val activeStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                   color = Color.WHITE
                   style = Paint.Style.STROKE
                   strokeCap = Paint.Cap.ROUND
               }
 
-              private val mainFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+              private val activeFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                   color = Color.WHITE
                   style = Paint.Style.FILL
               }
 
+              private val dimFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                  color = Color.parseColor("#40FFFFFF")
+                  style = Paint.Style.FILL
+              }
+
               private val shadowFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                  color = Color.parseColor("#CC000000")
+                  color = Color.parseColor("#90000000")
                   style = Paint.Style.FILL
               }
 
@@ -219,7 +230,7 @@ jobs:
               }
 
               private val textShadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                  color = Color.parseColor("#CC000000")
+                  color = Color.parseColor("#B0000000")
                   textAlign = Paint.Align.CENTER
                   typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
                   style = Paint.Style.STROKE
@@ -234,72 +245,86 @@ jobs:
                   val h = height.toFloat()
                   val cx = w / 2f
                   val cy = h / 2f
-                  val radius = (Math.min(w, h) / 2f) * 0.78f
+                  val radius = (Math.min(w, h) / 2f) * 0.82f
 
                   if (radius <= 0) return
 
-                  val strokeW = radius * 0.14f
-                  shadowStrokePaint.strokeWidth = strokeW * 1.6f
-                  mainStrokePaint.strokeWidth = strokeW
+                  val strokeW = radius * 0.15f
+                  shadowTrackPaint.strokeWidth = strokeW * 1.5f
+                  dimTrackPaint.strokeWidth = strokeW
+                  activeStrokePaint.strokeWidth = strokeW
 
-                  // 1. Teks Baterai "83" di Atas Tengah
-                  val fontPx = radius * 0.48f
-                  textPaint.textSize = fontPx
-                  textShadowPaint.textSize = fontPx
+                  // 1. Teks Angka Baterai di Atas Tengah
+                  val fontSize = radius * 0.44f
+                  textPaint.textSize = fontSize
+                  textShadowPaint.textSize = fontSize
                   textShadowPaint.strokeWidth = strokeW * 0.8f
 
                   val batteryText = "$batteryPct"
-                  val textY = cy - radius * 0.85f
+                  val textY = cy - radius * 0.82f
 
                   canvas.drawText(batteryText, cx, textY, textShadowPaint)
                   canvas.drawText(batteryText, cx, textY, textPaint)
 
-                  // 2. Busur Lengkung Sisi Kiri & Kanan (Bracket Arcs Baterai)
+                  // 2. Garis Busur Baterai Sisi Kiri & Kanan (Bracket Arcs)
                   val arcInset = strokeW * 0.8f
-                  rectF.set(cx - radius + arcInset, cy - radius + radius * 0.25f, cx + radius - arcInset, cy + radius - radius * 0.15f)
+                  rectF.set(cx - radius + arcInset, cy - radius + radius * 0.22f, cx + radius - arcInset, cy + radius - radius * 0.18f)
 
-                  val sweepAngle = 80f * (batteryPct / 100f)
+                  val maxSweep = 100f
+                  val progressSweep = maxSweep * (batteryPct / 100f)
 
-                  // Lapisan Kontras Penegas Latar Belakang
-                  canvas.drawArc(rectF, 135f, 90f, false, shadowStrokePaint)
-                  canvas.drawArc(rectF, -45f, 90f, false, shadowStrokePaint)
+                  // Gambar Bayangan Gelap Latar Belakang
+                  canvas.drawArc(rectF, 130f, 100f, false, shadowTrackPaint)
+                  canvas.drawArc(rectF, -50f, 100f, false, shadowTrackPaint)
 
-                  // Lapisan Utama Busur
-                  canvas.drawArc(rectF, 135f, sweepAngle, false, mainStrokePaint)
-                  canvas.drawArc(rectF, -45f, sweepAngle, false, mainStrokePaint)
+                  // Gambar Jalur Redup Transparan
+                  canvas.drawArc(rectF, 130f, 100f, false, dimTrackPaint)
+                  canvas.drawArc(rectF, -50f, 100f, false, dimTrackPaint)
+
+                  // Gambar Progress Aktif Baterai
+                  if (progressSweep > 0f) {
+                      // Kiri: Melengkung dari bawah (130°) ke atas (230°)
+                      canvas.drawArc(rectF, 130f, progressSweep, false, activeStrokePaint)
+                      // Kanan: Melengkung dari bawah (50°) ke atas (-50°)
+                      canvas.drawArc(rectF, 50f, -progressSweep, false, activeStrokePaint)
+                  }
 
                   // 3. Ikon Wi-Fi di Tengah
-                  val wifiCy = cy + radius * 0.1f
-                  val wifiStrokeW = strokeW * 0.85f
-                  val wifiMainPaint = Paint(mainStrokePaint).apply { strokeWidth = wifiStrokeW }
-                  val wifiShadowPaint = Paint(shadowStrokePaint).apply { strokeWidth = wifiStrokeW * 1.6f }
+                  val wifiCy = cy + radius * 0.12f
+                  val wifiStrokeW = strokeW * 0.82f
+
+                  val wifiActivePaint = Paint(activeStrokePaint).apply { strokeWidth = wifiStrokeW }
+                  val wifiDimPaint = Paint(dimTrackPaint).apply { strokeWidth = wifiStrokeW }
+                  val wifiShadowPaint = Paint(shadowTrackPaint).apply { strokeWidth = wifiStrokeW * 1.5f }
 
                   if (isWifiConnected) {
                       for (i in 1..3) {
-                          val r = radius * (0.12f + i * 0.12f)
+                          val r = radius * (0.10f + i * 0.11f)
                           rectF.set(cx - r, wifiCy - r, cx + r, wifiCy + r)
 
+                          // Shadow
+                          canvas.drawArc(rectF, 225f, 90f, false, wifiShadowPaint)
+
                           if (i <= wifiSignalLevel) {
-                              canvas.drawArc(rectF, 225f, 90f, false, wifiShadowPaint)
-                              canvas.drawArc(rectF, 225f, 90f, false, wifiMainPaint)
+                              canvas.drawArc(rectF, 225f, 90f, false, wifiActivePaint)
                           } else {
-                              val dimPaint = Paint(mainStrokePaint).apply {
-                                  color = Color.parseColor("#55FFFFFF")
-                                  strokeWidth = wifiStrokeW
-                              }
-                              canvas.drawArc(rectF, 225f, 90f, false, dimPaint)
+                              canvas.drawArc(rectF, 225f, 90f, false, wifiDimPaint)
                           }
                       }
                       // Titik Pusat Wi-Fi
-                      val dotR = radius * 0.055f
+                      val dotR = radius * 0.05f
                       val dotY = wifiCy + radius * 0.08f
-                      canvas.drawCircle(cx, dotY, dotR * 1.5f, shadowFillPaint)
-                      canvas.drawCircle(cx, dotY, dotR, mainFillPaint)
+                      canvas.drawCircle(cx, dotY, dotR * 1.6f, shadowFillPaint)
+                      if (wifiSignalLevel > 0) {
+                          canvas.drawCircle(cx, dotY, dotR, activeFillPaint)
+                      } else {
+                          canvas.drawCircle(cx, dotY, dotR, dimFillPaint)
+                      }
                   }
 
                   // 4. 4 Titik Sinyal GSM Melengkung di Bawah
                   val dotRadius = radius * 0.065f
-                  val dotArcR = radius * 0.95f
+                  val dotArcR = radius * 0.92f
                   val angles = floatArrayOf(60f, 80f, 100f, 120f)
 
                   for (i in 0..3) {
@@ -307,12 +332,13 @@ jobs:
                       val dotX = cx + (dotArcR * Math.cos(angleRad)).toFloat()
                       val dotY = cy + (dotArcR * Math.sin(angleRad)).toFloat()
 
+                      // Shadow
+                      canvas.drawCircle(dotX, dotY, dotRadius * 1.6f, shadowFillPaint)
+
                       if (i < gsmSignalLevel) {
-                          canvas.drawCircle(dotX, dotY, dotRadius * 1.5f, shadowFillPaint)
-                          canvas.drawCircle(dotX, dotY, dotRadius, mainFillPaint)
+                          canvas.drawCircle(dotX, dotY, dotRadius, activeFillPaint)
                       } else {
-                          val dimDotPaint = Paint(mainFillPaint).apply { color = Color.parseColor("#55FFFFFF") }
-                          canvas.drawCircle(dotX, dotY, dotRadius, dimDotPaint)
+                          canvas.drawCircle(dotX, dotY, dotRadius, dimFillPaint)
                       }
                   }
               }
@@ -786,7 +812,7 @@ jobs:
                           status == BatteryManager.BATTERY_STATUS_FULL
                   val batteryPct = if (level != -1 && scale != -1) {
                       (level * 100 / scale.toFloat()).toInt()
-                  } else 83
+                  } else 62
 
                   // Wi-Fi Status & Signal Level
                   val connManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
@@ -893,17 +919,18 @@ jobs:
           ## ✨ Desain & Fitur Arsitektur Utama
 
           ```text
-                     83            <-- Battery Percentage Text (Top Center)
-                  (  📶  )         <-- Dynamic Battery Bracket Arcs (Left/Right) & Wi-Fi Center
+                     62            <-- Battery Percentage Text (Top Center)
+                  (  📶  )         <-- Symmetrical Dual-Bracket Arcs & Wi-Fi Center
                     ••••           <-- Curved GSM Cellular Signal Dots (Bottom Arc)
           ```
 
-          1. **Unified Dual-Bracket Battery Arc**:
-             - Garis busur melengkung di sisi Kiri dan Kanan (`( )`) yang secara dinamis memanjang/memendek sesuai sisa kapasitas baterai (0–100%).
-          2. **Adaptive Contrast Auto-Outline Engine**:
+          1. **Symmetrical Dual-Bracket Battery Arc**:
+             - Garis busur melengkung ganda di sisi Kiri dan Kanan (`( )`) yang secara teratur terisi dari bawah ke atas sesuai daya baterai.
+             - Memiliki *dim-track translucent arc* di latar belakang agar bentuk busur utuh bergaya Apple Watch selalu membayang rapi.
+          2. **Adaptive Contrast Outer Halo**:
              - Menggunakan teknik rendering *Dual-pass Stroke Halo Shadow*.
              - Menjamin seluruh garis, angka, dan titik indikator **tetap kontras dan 100% terbaca jelas di atas wallpaper apa pun** (gelap, terang, maupun *colorful*).
-          3. **Real-time Wi-Fi Signal Telemetry**:
+          3. **Vector Wi-Fi Signal Telemetry**:
              - Tampilan busur sinyal Wi-Fi di posisi pusat secara instan menyesuaikan dengan indeks RSSI jaringan (*Signal Level 0..4*).
           4. **Curved Cellular GSM Signal Dots**:
              - 4 titik indikator sinyal seluler yang tersusun melengkung presisi mengikuti kontur busur lingkaran bawah.
@@ -948,23 +975,6 @@ jobs:
           3. Commit perubahan secara terstruktur (`git commit -m 'feat: menambahkan dukungan gesture'`).
           4. Push branch Anda (`git push origin feature/FiturKerenAnda`).
           5. Buka **Pull Request** ke branch `main`.
-
-          ---
-
-          ## 🗺️ Peta Jalan Fitur Terencana (Collaborator Roadmap)
-
-          - [ ] **Dynamic Wallpaper Luminance Detection**: Membaca nilai RGB piksel layar di bawah overlay untuk penyesuaian otomatis warna dinamis.
-          - [ ] **Interactive Double-Tap Actions**: Membuka Quick Settings atau Notification Center saat overlay diketuk dua kali.
-          - [ ] **Custom Color Palette Picker**: Pilihan kustomisasi warna bebas untuk busur baterai dan ikon.
-          - [ ] **Auto Start on Boot**: Listener `RECEIVE_BOOT_COMPLETED` agar service otomatis aktif saat HP dihidupkan.
-
-          ---
-
-          ## 🔒 Kebijakan Izin Sistem (Permissions)
-
-          * `SYSTEM_ALERT_WINDOW`: Menampilkan overlay di atas semua antarmuka aplikasi lain.
-          * `FOREGROUND_SERVICE`: Menjaga Service tetap berjalan stabil di latar belakang tanpa dihentikan sistem OS.
-          * `ACCESS_NETWORK_STATE` & `ACCESS_WIFI_STATE`: Membaca level kekuatan sinyal Wi-Fi.
 
           ---
 
