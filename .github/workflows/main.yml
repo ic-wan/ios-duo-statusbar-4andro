@@ -320,11 +320,13 @@ jobs:
           }
           EOF
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - name: Generate Gradle Wrapper 8.5
+        run: |
+          gradle wrapper --gradle-version 8.5
+          chmod +x gradlew
 
-      - name: Build APK
-        run: gradle assembleDebug
+      - name: Build APK with Gradle Wrapper
+        run: ./gradlew assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
