@@ -3,7 +3,9 @@
 Overlay indikator sistem bergaya **iOS Duo** untuk Android, dibuat dengan **native Kotlin + Canvas** tanpa library UI pihak ketiga.
 
 <!-- BUILD_META_START -->
-Build metadata akan diisi otomatis oleh GitHub Actions setelah build pada branch `main`.
+**Build terakhir:** `2026-10-04 01:36:35 WIB`  
+**APK artifact:** `iOS_Duo_Status_Bar_20261004_013635.apk`  
+**Run:** https://github.com/ic-wan/ios-duo-statusbar-4andro/actions/runs/37144601336
 <!-- BUILD_META_END -->
 
 ## Tampilan
