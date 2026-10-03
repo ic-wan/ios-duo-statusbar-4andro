@@ -19,11 +19,12 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Generate Complete Android Project Structure
+      - name: Generate Complete Android Project & README
         run: |
-          # 1. Buat direktori folder project
+          # 1. Buat direktori folder project & res/drawable
           mkdir -p app/src/main/java/com/example/iosstatusbar
           mkdir -p app/src/main/res/layout
+          mkdir -p app/src/main/res/drawable
 
           # 2. Buat settings.gradle
           cat << 'EOF' > settings.gradle
@@ -99,7 +100,94 @@ jobs:
           }
           EOF
 
-          # 6. Buat AndroidManifest.xml
+          # 6. Buat Background Capsule iOS (bg_ios_capsule.xml)
+          cat << 'EOF' > app/src/main/res/drawable/bg_ios_capsule.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
+              android:shape="rectangle">
+              <corners android:radius="8dp" />
+              <solid android:color="#66000000" />
+              <padding
+                  android:bottom="3dp"
+                  android:left="5dp"
+                  android:right="5dp"
+                  android:top="3dp" />
+          </shape>
+          EOF
+
+          # 7. Buat Vector Icon Baterai iOS (ic_ios_battery.xml)
+          cat << 'EOF' > app/src/main/res/drawable/ic_ios_battery.xml
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="18dp"
+              android:height="10dp"
+              android:viewportWidth="22"
+              android:viewportHeight="12">
+              <path
+                  android:fillColor="#FFFFFF"
+                  android:pathData="M2,2 h15 a2,2 0 0 1 2,2 v4 a2,2 0 0 1 -2,2 h-15 a2,2 0 0 1 -2,-2 v-4 a2,2 0 0 1 2,-2 z M20,4.5 v3 a1,1 0 0 0 1,-1 v-1 a1,1 0 0 0 -1,-1 z M3,3.5 v5 h10 v-5 z"/>
+          </vector>
+          EOF
+
+          # 8. Buat Vector Icon Wi-Fi iOS (ic_ios_wifi.xml)
+          cat << 'EOF' > app/src/main/res/drawable/ic_ios_wifi.xml
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="13dp"
+              android:height="10dp"
+              android:viewportWidth="24"
+              android:viewportHeight="24">
+              <path
+                  android:fillColor="#FFFFFF"
+                  android:pathData="M12,18 a2,2 0 1,1 0,4 a2,2 0 0,1 0,-4 z M4.93,12.93 a1,1 0 0,1 1.41,0 a8,8 0 0,1 11.32,0 a1,1 0 1,1 -1.41,1.41 a6,6 0 0,0 -8.49,0 a1,1 0 0,1 -1.41,-1.41 z M1.39,9.39 a1,1 0 0,1 1.41,0 a13,13 0 0,1 18.38,0 a1,1 0 1,1 -1.41,1.41 a11,11 0 0,0 -15.56,0 a1,1 0 0,1 -1.41,-1.41 z"/>
+          </vector>
+          EOF
+
+          # 9. Buat Vector Icon Seluler iOS (ic_ios_cellular.xml)
+          cat << 'EOF' > app/src/main/res/drawable/ic_ios_cellular.xml
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="13dp"
+              android:height="10dp"
+              android:viewportWidth="24"
+              android:viewportHeight="24">
+              <path
+                  android:fillColor="#FFFFFF"
+                  android:pathData="M3,16 h2 v5 h-2 z M8,12 h2 v9 h-2 z M13,8 h2 v13 h-2 z M18,4 h2 v17 h-2 z"/>
+          </vector>
+          EOF
+
+          # 10. Buat layout_stacked_status.xml
+          cat << 'EOF' > app/src/main/res/layout/layout_stacked_status.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:background="@drawable/bg_ios_capsule"
+              android:gravity="center"
+              android:orientation="vertical">
+
+              <ImageView
+                  android:id="@+id/imgBattery"
+                  android:layout_width="16dp"
+                  android:layout_height="9dp"
+                  android:src="@drawable/ic_ios_battery" />
+
+              <ImageView
+                  android:id="@+id/imgWifi"
+                  android:layout_width="13dp"
+                  android:layout_height="9dp"
+                  android:layout_marginTop="2dp"
+                  android:src="@drawable/ic_ios_wifi" />
+
+              <ImageView
+                  android:id="@+id/imgCellular"
+                  android:layout_width="13dp"
+                  android:layout_height="9dp"
+                  android:layout_marginTop="2dp"
+                  android:src="@drawable/ic_ios_cellular" />
+
+          </LinearLayout>
+          EOF
+
+          # 11. Buat AndroidManifest.xml
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -131,41 +219,7 @@ jobs:
           </manifest>
           EOF
 
-          # 7. Buat layout_stacked_status.xml
-          cat << 'EOF' > app/src/main/res/layout/layout_stacked_status.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:orientation="vertical"
-              android:padding="3dp"
-              android:gravity="center"
-              android:background="#22000000">
-
-              <ImageView
-                  android:id="@+id/imgBattery"
-                  android:layout_width="16dp"
-                  android:layout_height="9dp"
-                  android:src="@android:drawable/ic_lock_idle_low_battery" />
-
-              <ImageView
-                  android:id="@+id/imgWifi"
-                  android:layout_width="12dp"
-                  android:layout_height="9dp"
-                  android:layout_marginTop="1dp"
-                  android:src="@android:drawable/ic_dialog_alert" />
-
-              <ImageView
-                  android:id="@+id/imgCellular"
-                  android:layout_width="12dp"
-                  android:layout_height="9dp"
-                  android:layout_marginTop="1dp"
-                  android:src="@android:drawable/ic_menu_call" />
-
-          </LinearLayout>
-          EOF
-
-          # 8. Buat MainActivity.kt
+          # 12. Buat MainActivity.kt
           cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/MainActivity.kt
           package com.example.iosstatusbar
 
@@ -210,7 +264,7 @@ jobs:
           }
           EOF
 
-          # 9. Buat StatusBarOverlayService.kt
+          # 13. Buat StatusBarOverlayService.kt
           cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/StatusBarOverlayService.kt
           package com.example.iosstatusbar
 
@@ -254,15 +308,15 @@ jobs:
                       PixelFormat.TRANSLUCENT
                   ).apply {
                       gravity = Gravity.TOP or Gravity.END
-                      x = 24
-                      y = 12
+                      x = 18
+                      y = 8
                   }
 
                   windowManager.addView(overlayView, params)
 
                   monitor = SystemStatusMonitor(this) { pct, isCharging ->
                       val imgBattery = overlayView.findViewById<ImageView>(R.id.imgBattery)
-                      imgBattery.alpha = if (isCharging) 1.0f else 0.8f
+                      imgBattery.alpha = if (isCharging) 1.0f else 0.85f
                   }
                   monitor.start()
               }
@@ -277,7 +331,7 @@ jobs:
           }
           EOF
 
-          # 10. Buat SystemStatusMonitor.kt
+          # 14. Buat SystemStatusMonitor.kt
           cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/SystemStatusMonitor.kt
           package com.example.iosstatusbar
 
@@ -320,6 +374,64 @@ jobs:
           }
           EOF
 
+          # 15. Buat README.md Otomatis dengan Format Tanggal Dinamis
+          CURRENT_DATE=$(date +'%Y-%m-%d')
+          cat << EOF > README.md
+          # iOS Duo Status Bar for Android 📱
+
+          Aplikasi Android untuk menampilkan modul overlay status bar gaya **iOS Duo**, di mana ikon **Baterai**, **Wi-Fi**, dan **Sinyal Seluler** ditumpuk secara vertikal dalam satu grup visual tanpa memerlukan akses Root.
+
+          ---
+
+          ## 🌟 Fitur Utama
+          - **Stacked Status Bar Icons**: Ikon Baterai, Wi-Fi, dan Seluler disusun menumpuk secara vertikal ala iOS Duo.
+          - **Tanpa Root**: Menggunakan \`WindowManager\` (\`TYPE_APPLICATION_OVERLAY\`) sehingga dapat berjalan di semua perangkat Android (Android 7.0 / SDK 24+).
+          - **Real-Time System Monitoring**: Memantau status persentase dan pengisian daya baterai secara langsung menggunakan \`BroadcastReceiver\`.
+
+          ---
+
+          ## 🛠️ Skema Pembuatan & Arsitektur
+
+          Aplikasi ini dibangun menggunakan arsitektur native Android (Kotlin) dan dikompilasi secara otomatis menggunakan **GitHub Actions CI/CD Pipeline**.
+
+          ### 1. Komponen Aplikasi
+          * **\`MainActivity.kt\`**: Memeriksa dan meminta izin akses overlay (\`SYSTEM_ALERT_WINDOW\`) dari pengguna.
+          * **\`StatusBarOverlayService.kt\`**: Service yang merender layout tumpuk di atas status bar sistem menggunakan \`WindowManager\`.
+          * **\`SystemStatusMonitor.kt\`**: Memantau perubahan status baterai dan konektivitas secara *real-time*.
+          * **\`layout_stacked_status.xml\`**: Layout UI vertikal (\`LinearLayout\`) tempat penumpukan ikon Baterai, Wi-Fi, dan Seluler.
+          * **Vector Drawables**: Aset ikon tumpuk bergaya Vektor iOS (\`ic_ios_battery.xml\`, \`ic_ios_wifi.xml\`, \`ic_ios_cellular.xml\`, \`bg_ios_capsule.xml\`).
+
+          ### 2. Pipeline Kompilasi Otomatis (CI/CD)
+          Proses pengerjaan dan *build* dilakukan otomatis melalui skrip \`.github/workflows/main.yml\`:
+          1. **Environment**: Linux Ubuntu dengan Java JDK 17.
+          2. **Build Tool**: Gradle 8.5 via Gradle Wrapper & Android Gradle Plugin (AGP) 8.2.2.
+          3. **Trigger**: Memicu kompilasi otomatis setiap ada \`push\` ke branch \`main\`/\`master\` atau dijalankan secara manual (\`workflow_dispatch\`).
+          4. **Penamaan Dinamis**: Setiap artifact yang dihasilkan secara otomatis diberi penamaan berdasarkan tanggal kompilasi (\`iOS-Duo-StatusBar-YYYY-MM-DD\`).
+
+          ---
+
+          ## 📦 Unduh APK & Artifacts
+
+          File APK hasil kompilasi dapat diunduh langsung dari tab **Actions** pada repository ini:
+
+          👉 **[Link ke Halaman Artifacts / Build Terbaru](../../actions)**
+
+          ### Penamaan Artifact Rilis:
+          * **Build Saat Ini**: \`iOS-Duo-StatusBar-${CURRENT_DATE}\`
+          * **Rilis Berikutnya**: Setiap *build* atau *push* baru akan secara otomatis dinamai \`iOS-Duo-StatusBar-YYYY-MM-DD\` mengikuti tanggal proses kompilasi dijalankan.
+
+          ---
+
+          ## 🚀 Cara Instalasi & Penggunaan
+
+          1. Masuk ke tab **[Actions](../../actions)** pada repository ini.
+          2. Klik pada riwayat *build* paling atas yang bertanda **Centang Hijau (✓)**.
+          3. Gulir ke bagian **Artifacts** di bawah halaman detail build, lalu tekan nama file artifact (\`iOS-Duo-StatusBar-${CURRENT_DATE}\`) untuk mengunduhnya.
+          4. Ekstrak file \`.zip\` yang terunduh untuk mendapatkan file \`app-debug.apk\`.
+          5. Instal file \`.apk\` tersebut di HP Android Anda.
+          6. Buka aplikasi, klik tombol **Aktifkan iOS Duo Status Bar**, dan berikan izin **Tampilkan di atas aplikasi lain** (*Display over other apps*).
+          EOF
+
       - name: Generate Gradle Wrapper 8.5
         run: |
           gradle wrapper --gradle-version 8.5
@@ -328,8 +440,20 @@ jobs:
       - name: Build APK with Gradle Wrapper
         run: ./gradlew assembleDebug
 
+      - name: Get Current Date
+        id: date
+        run: echo "DATE=$(date +'\%Y-\%m-\%d')" >> $GITHUB_ENV
+
+      - name: Commit and Push README Update
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs: update README with build date artifacts link [skip ci]" || echo "No changes to commit"
+          git push origin HEAD:${{ github.ref_name }} || echo "Push skipped"
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: iOS-Duo-StatusBar-APK
+          name: iOS-Duo-StatusBar-${{ env.DATE }}
           path: app/build/outputs/apk/debug/app-debug.apk
