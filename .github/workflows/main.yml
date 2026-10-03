@@ -19,14 +19,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Generate Complete Android Project & README
+      - name: Generate Android Project Source Code
         run: |
-          # 1. Buat direktori folder project & res/drawable
+          # 1. Buat direktori folder project
           mkdir -p app/src/main/java/com/example/iosstatusbar
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/drawable
 
-          # 2. Buat settings.gradle
+          # 2. settings.gradle
           cat << 'EOF' > settings.gradle
           pluginManagement {
               repositories {
@@ -46,7 +46,7 @@ jobs:
           include ':app'
           EOF
 
-          # 3. Buat root build.gradle
+          # 3. build.gradle
           cat << 'EOF' > build.gradle
           plugins {
               id 'com.android.application' version '8.2.2' apply false
@@ -54,13 +54,13 @@ jobs:
           }
           EOF
 
-          # 4. Buat gradle.properties
+          # 4. gradle.properties
           cat << 'EOF' > gradle.properties
           android.useAndroidX=true
           android.nonTransitiveRClass=true
           EOF
 
-          # 5. Buat app/build.gradle
+          # 5. app/build.gradle
           cat << 'EOF' > app/build.gradle
           plugins {
               id 'com.android.application'
@@ -100,7 +100,7 @@ jobs:
           }
           EOF
 
-          # 6. Buat Background Capsule iOS (bg_ios_capsule.xml)
+          # 6. Background Capsule iOS (bg_ios_capsule.xml)
           cat << 'EOF' > app/src/main/res/drawable/bg_ios_capsule.xml
           <?xml version="1.0" encoding="utf-8"?>
           <shape xmlns:android="http://schemas.android.com/apk/res/android"
@@ -115,7 +115,7 @@ jobs:
           </shape>
           EOF
 
-          # 7. Buat Vector Icon Baterai iOS (ic_ios_battery.xml)
+          # 7. Vector Icon Baterai iOS (ic_ios_battery.xml)
           cat << 'EOF' > app/src/main/res/drawable/ic_ios_battery.xml
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="18dp"
@@ -128,7 +128,7 @@ jobs:
           </vector>
           EOF
 
-          # 8. Buat Vector Icon Wi-Fi iOS (ic_ios_wifi.xml)
+          # 8. Vector Icon Wi-Fi iOS (ic_ios_wifi.xml)
           cat << 'EOF' > app/src/main/res/drawable/ic_ios_wifi.xml
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="13dp"
@@ -141,7 +141,7 @@ jobs:
           </vector>
           EOF
 
-          # 9. Buat Vector Icon Seluler iOS (ic_ios_cellular.xml)
+          # 9. Vector Icon Seluler iOS (ic_ios_cellular.xml)
           cat << 'EOF' > app/src/main/res/drawable/ic_ios_cellular.xml
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="13dp"
@@ -154,7 +154,7 @@ jobs:
           </vector>
           EOF
 
-          # 10. Buat layout_stacked_status.xml
+          # 10. layout_stacked_status.xml
           cat << 'EOF' > app/src/main/res/layout/layout_stacked_status.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -187,7 +187,7 @@ jobs:
           </LinearLayout>
           EOF
 
-          # 11. Buat AndroidManifest.xml
+          # 11. AndroidManifest.xml
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -219,7 +219,7 @@ jobs:
           </manifest>
           EOF
 
-          # 12. Buat MainActivity.kt
+          # 12. MainActivity.kt
           cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/MainActivity.kt
           package com.example.iosstatusbar
 
@@ -264,7 +264,7 @@ jobs:
           }
           EOF
 
-          # 13. Buat StatusBarOverlayService.kt
+          # 13. StatusBarOverlayService.kt
           cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/StatusBarOverlayService.kt
           package com.example.iosstatusbar
 
@@ -331,7 +331,7 @@ jobs:
           }
           EOF
 
-          # 14. Buat SystemStatusMonitor.kt
+          # 14. SystemStatusMonitor.kt
           cat << 'EOF' > app/src/main/java/com/example/iosstatusbar/SystemStatusMonitor.kt
           package com.example.iosstatusbar
 
@@ -374,8 +374,27 @@ jobs:
           }
           EOF
 
-          # 15. Buat README.md Otomatis dengan Format Tanggal Dinamis
-          CURRENT_DATE=$(date +'%Y-%m-%d')
+      - name: Generate Gradle Wrapper 8.5
+        run: |
+          gradle wrapper --gradle-version 8.5
+          chmod +x gradlew
+
+      - name: Build APK with Gradle Wrapper
+        run: ./gradlew assembleDebug
+
+      - name: Get Clean Date String
+        id: get_date
+        run: echo "DATE=$(date +\%Y-\%m-\%d)" >> $GITHUB_ENV
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iOS-Duo-StatusBar-${{ env.DATE }}
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Update README.md on Build Success
+        if: success()
+        run: |
           cat << EOF > README.md
           # iOS Duo Status Bar for Android 📱
 
@@ -417,8 +436,8 @@ jobs:
           👉 **[Link ke Halaman Artifacts / Build Terbaru](../../actions)**
 
           ### Penamaan Artifact Rilis:
-          * **Build Saat Ini**: \`iOS-Duo-StatusBar-${CURRENT_DATE}\`
-          * **Rilis Berikutnya**: Setiap *build* atau *push* baru akan secara otomatis dinamai \`iOS-Duo-StatusBar-YYYY-MM-DD\` mengikuti tanggal proses kompilasi dijalankan.
+          * **Build Terakhir Berhasil**: \`iOS-Duo-StatusBar-${{ env.DATE }}\`
+          * **Rilis Berikutnya**: Setiap *build* baru yang berhasil akan secara otomatis memperbarui README ini dan dinamai \`iOS-Duo-StatusBar-YYYY-MM-DD\` sesuai tanggal pembuatan.
 
           ---
 
@@ -426,34 +445,14 @@ jobs:
 
           1. Masuk ke tab **[Actions](../../actions)** pada repository ini.
           2. Klik pada riwayat *build* paling atas yang bertanda **Centang Hijau (✓)**.
-          3. Gulir ke bagian **Artifacts** di bawah halaman detail build, lalu tekan nama file artifact (\`iOS-Duo-StatusBar-${CURRENT_DATE}\`) untuk mengunduhnya.
+          3. Gulir ke bagian **Artifacts** di bawah halaman detail build, lalu tekan nama file artifact (\`iOS-Duo-StatusBar-${{ env.DATE }}\`) untuk mengunduhnya.
           4. Ekstrak file \`.zip\` yang terunduh untuk mendapatkan file \`app-debug.apk\`.
           5. Instal file \`.apk\` tersebut di HP Android Anda.
           6. Buka aplikasi, klik tombol **Aktifkan iOS Duo Status Bar**, dan berikan izin **Tampilkan di atas aplikasi lain** (*Display over other apps*).
           EOF
 
-      - name: Generate Gradle Wrapper 8.5
-        run: |
-          gradle wrapper --gradle-version 8.5
-          chmod +x gradlew
-
-      - name: Build APK with Gradle Wrapper
-        run: ./gradlew assembleDebug
-
-      - name: Get Current Date
-        id: date
-        run: echo "DATE=$(date +'\%Y-\%m-\%d')" >> $GITHUB_ENV
-
-      - name: Commit and Push README Update
-        run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git commit -m "docs: update README with build date artifacts link [skip ci]" || echo "No changes to commit"
+          git commit -m "docs: update README with latest build date [skip ci]" || echo "No changes to commit"
           git push origin HEAD:${{ github.ref_name }} || echo "Push skipped"
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: iOS-Duo-StatusBar-${{ env.DATE }}
-          path: app/build/outputs/apk/debug/app-debug.apk
