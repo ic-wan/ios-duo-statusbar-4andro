@@ -158,4 +158,3 @@ jobs:
             git commit -m "docs: update latest build metadata [skip ci]" &&
             git push origin HEAD:${GITHUB_REF_NAME}
           )
-
