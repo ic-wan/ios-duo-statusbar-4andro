@@ -37,7 +37,7 @@
                 android:paddingTop="6dp"
                 android:paddingEnd="12dp"
                 android:paddingBottom="6dp"
-                android:text="v5.3"
+                android:text="v5.4"
                 android:textColor="@color/duo_text"
                 android:textSize="12sp"
                 android:textStyle="bold" />

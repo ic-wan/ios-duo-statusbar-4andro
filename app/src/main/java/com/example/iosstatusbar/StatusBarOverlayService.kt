@@ -108,7 +108,7 @@ class StatusBarOverlayService : Service() {
 
         val p = params ?: return
         val sizePx = sizeDp.dp()
-        val outsideMultiplier = if (wifiOutside) 2.55f else 1.0f
+        val outsideMultiplier = if (wifiOutside) 2.15f else 1.0f
         val desiredWidthPx = (sizePx * outsideMultiplier).toInt().coerceAtLeast(sizePx)
 
         // In Camera Hole Mode the renderer needs horizontal room for

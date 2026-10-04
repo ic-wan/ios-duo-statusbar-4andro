@@ -5,10 +5,9 @@
 > **Measure first. Render precisely. Document clearly. Improve together.**
 
 <!-- BUILD_META_START -->
-**Build terakhir:** `2026-10-04 08:04:45 WIB`  
-**APK artifact:** `iOS_Duo_Status_Bar_20261004_080445.apk`  
-**SHA-256:** `3c3549d481b167cf855ef4d07b56eeb4229f27ae13d4c1bca03caea478ed5cf0`  
-**Run:** https://github.com/ic-wan/ios-duo-statusbar-4andro/actions/runs/37166769745
+**Build terakhir:** akan diperbarui otomatis oleh GitHub Actions.  
+**Release:** `5.4.0`  
+**Artifact:** tersedia di **Actions → Artifacts** setelah workflow selesai.
 <!-- BUILD_META_END -->
 
 ## Project Vision
@@ -18,6 +17,24 @@ iOS Duo Status Bar adalah proyek **open-source, community-driven, dan device-ori
 Proyek dibangun dari **native Kotlin + Canvas + vector geometry**. Telemetry overlay tidak memakai bitmap sebagai sumber rendering, sehingga geometry dapat diskalakan tanpa kehilangan bentuk dasar.
 
 Proyek ini tidak berafiliasi dengan Apple dan tidak menggunakan aset proprietary Apple. Nama **Duo** mengacu pada komposisi visual indikator yang menggabungkan battery, Wi-Fi, dan cellular dalam satu mark.
+
+
+## Rendering Revision 5.4
+
+Versi 5.4 memperkenalkan **normalized composition geometry**. Seluruh elemen—persentase baterai, battery arcs, Wi-Fi, dan dua baris indikator SIM—diturunkan dari satu radius ring yang sama. Dengan demikian, ketika ukuran overlay diperkecil, hubungan visual antarelemen tetap proporsional dan tidak berubah menjadi tumpang tindih.
+
+### Prinsip visual 5.4
+
+- **Battery text** ditempatkan rapat di atas ring pada Standard Mode sehingga terasa sebagai bagian dari satu mark, bukan teks terpisah.
+- **Battery arcs** menggunakan satu circular bounding geometry yang sama untuk sisi kiri dan kanan.
+- **Wi-Fi** menggunakan pusat dot yang sama sebagai pusat tiga arc, sehingga jarak dot ke bar Wi-Fi tetap rapat pada ukuran kecil maupun besar.
+- **Dual SIM** menggunakan dua baris empat titik yang berada di dalam lower ring dan mengikuti kurva dangkal agar lebih menyatu dengan lingkaran.
+- **Camera Hole Mode** mempertahankan kamera sebagai pusat komposisi; angka baterai dan Wi-Fi berada pada garis horizontal yang sama dan simetris terhadap pusat tersebut.
+- Pengaturan pengguna tetap independen: ukuran overlay, ketebalan arc, ukuran/weight angka, ukuran/ketebalan Wi-Fi, dan ukuran titik SIM.
+
+### Filosofi scaling
+
+Ukuran keseluruhan bukan sekadar mengecilkan setiap objek secara terpisah. Renderer mempertahankan **rasio jarak, ukuran, dan posisi relatif terhadap ring** sehingga satu desain yang sama tetap terbaca pada ukuran kecil maupun besar.
 
 ## Visual System
 
