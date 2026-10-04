@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--
-        Base theme for API 24+.
-        API 27+ navigation bar appearance is defined separately in values-v27/
-        because android:windowLightNavigationBar was introduced in API 27.
-    -->
+    <!-- Android 8.1+ (API 27): light navigation bar icons are supported here. -->
     <style name="Theme.IosDuo" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:statusBarColor">@color/duo_bg</item>
         <item name="android:navigationBarColor">@color/duo_bg</item>
+        <item name="android:windowLightNavigationBar">true</item>
         <item name="android:colorAccent">@color/duo_accent</item>
     </style>
 </resources>

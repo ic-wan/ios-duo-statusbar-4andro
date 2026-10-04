@@ -6,7 +6,7 @@
 
 <!-- BUILD_META_START -->
 **Build terakhir:** akan diperbarui otomatis oleh GitHub Actions.  
-**Release:** `5.2.0`  
+**Release:** `5.2.1`  
 **Artifact:** tersedia pada tab **Actions → Artifacts** setelah workflow selesai.
 <!-- BUILD_META_END -->
 
@@ -58,7 +58,7 @@ Proyek ini **tidak berafiliasi dengan Apple**, tidak menggunakan aset proprietar
 
 ## ✦ Premium Calibration
 
-v5.2 memisahkan parameter visual yang sebelumnya saling bergantung:
+v5.2.1 memisahkan parameter visual yang sebelumnya saling bergantung:
 
 | Parameter | Fungsi |
 |---|---|
