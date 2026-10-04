@@ -1,161 +1,147 @@
 # iOS Duo Status Bar for Android
 
-> **A compact, native Android telemetry overlay inspired by the visual language of premium mobile status indicators.**
+> **A compact, native Android telemetry overlay inspired by premium mobile status-indicator language.**
 >
 > **Measure first. Render precisely. Document clearly. Improve together.**
 
 <!-- BUILD_META_START -->
-**Build terakhir:** `2026-10-04 07:24:00 WIB`  
-**APK artifact:** `iOS_Duo_Status_Bar_20261004_072400.apk`  
-**SHA-256:** `5a34634fa397b1252baccb06c04ef9bdc66635a155337054c0bbdcb4999b0833`  
-**Run:** https://github.com/ic-wan/ios-duo-statusbar-4andro/actions/runs/37164705451
+**Build terakhir:** akan diperbarui otomatis oleh GitHub Actions.  
+**Release:** `5.3.0`  
+**Artifact:** tersedia di **Actions → Artifacts** setelah workflow selesai.
 <!-- BUILD_META_END -->
 
----
+## Project Vision
 
-## ✦ Project Vision
+iOS Duo Status Bar adalah proyek **open-source, community-driven, dan device-oriented** untuk menghadirkan indikator telemetri sistem yang ringkas, tajam, dan dapat dikalibrasi di area atas layar Android.
 
-iOS Duo Status Bar adalah proyek **open-source, community-driven** untuk menghadirkan indikator telemetri sistem yang ringkas, tajam, dan dapat dikalibrasi di area atas layar Android.
+Proyek dibangun dari **native Kotlin + Canvas + vector geometry**. Telemetry overlay tidak memakai bitmap sebagai sumber rendering, sehingga geometry dapat diskalakan tanpa kehilangan bentuk dasar.
 
-Seluruh indikator utama dirender menggunakan **native Kotlin Canvas + vector geometry**. Tidak ada bitmap telemetry untuk rendering overlay. Tujuannya adalah mempertahankan ketajaman pada berbagai density, menjaga penggunaan resource tetap rasional, dan memberi ruang bagi komunitas untuk bereksperimen dengan geometry, telemetry, dan perangkat yang berbeda.
+Proyek ini tidak berafiliasi dengan Apple dan tidak menggunakan aset proprietary Apple. Nama **Duo** mengacu pada komposisi visual indikator yang menggabungkan battery, Wi-Fi, dan cellular dalam satu mark.
 
-Proyek ini **tidak berafiliasi dengan Apple**, tidak menggunakan aset proprietary Apple, dan menggunakan istilah “Duo” sebagai nama konsep visual komposisi indikator.
-
-## ✦ Visual System
+## Visual System
 
 ```text
-                    57       Wi-Fi*
+                     35       Wi-Fi
+                              ╭───╮
+                             ╭─────╮
+                                ●
 
-              ╭────────────╮  ╭──╮
-            ╭                ╮╭────╮
-           │                  ╰──●─╯
-            ╰                ╯
-              •    •    •    •
-
-       Battery  → side arcs + percentage
-       Wi-Fi    → 3 nested arcs + center dot
-       Cellular → 4 lower dots
-
-* Camera Hole Mode: Wi-Fi berada di luar ring dan sejajar
-  horizontal dengan angka baterai.
+                  ╭────────────────────╮
+                ╭                        ╮
+               │        CAMERA HOLE      │
+                ╰                        ╯
+                   • • • •
+                   • • • •
+                 SIM 1   SIM 2
 ```
 
 ### Battery
+
 - Angka persentase berada di atas ring.
-- Dua side-arc simetris membentuk satu indikator baterai.
+- Arc kiri dan kanan adalah **satu indikator baterai**; keduanya mengikuti level baterai yang sama.
 - Panjang arc aktif mengikuti persentase baterai.
-- Ketebalan arc, ukuran angka, dan weight angka dapat diatur independen.
+- Ketebalan arc dan tipografi dapat dikalibrasi secara independen.
 
 ### Wi-Fi
-- Tiga nested arcs menunjukkan level RSSI.
-- Terhubung: jumlah arc aktif mengikuti kekuatan jaringan.
-- Tidak terhubung: indikator menjadi dim/kosong.
-- **Camera Hole Mode** memindahkan Wi-Fi ke sisi angka baterai pada satu garis horizontal, sehingga pusat ring dapat dibiarkan kosong untuk punch-hole kamera.
 
-### Cellular
-- Empat titik mengikuti kurva bawah.
-- Jumlah titik aktif mengikuti level sinyal operator.
-- Ukuran titik dapat dikalibrasi agar sebanding dengan status-bar icon perangkat.
+- Tiga nested arcs menunjukkan level sinyal Wi-Fi.
+- Saat Wi-Fi terhubung, jumlah arc aktif mengikuti level telemetri.
+- Saat Wi-Fi tidak terhubung, glyph menjadi dim/kosong.
+- **Standard Mode:** Wi-Fi ditempatkan tepat di pusat ring.
+- **Camera Hole Mode:** Wi-Fi dipindahkan ke luar ring dan dibuat sejajar dengan angka baterai. Angka + Wi-Fi membentuk pasangan yang simetris terhadap pusat ring sehingga area punch-hole dapat tetap kosong.
+- Ukuran glyph dan ketebalan stroke Wi-Fi dapat diatur terpisah.
 
-## ✦ Premium Calibration
+### Cellular / Dual SIM
 
-v5.2.1 memisahkan parameter visual yang sebelumnya saling bergantung:
+- Satu SIM digambarkan dengan **4 titik**.
+- **SIM 1 / primary** berada pada baris atas.
+- **SIM 2 / secondary** berada pada baris bawah.
+- Jarak antartitik dibuat lebih longgar untuk menjaga keterbacaan pada ukuran overlay kecil.
+- Bila SIM kedua tidak tersedia, baris kedua tetap menjadi track redup sehingga struktur Duo tidak berubah.
+
+## Premium Calibration
+
+Gunakan kontrol detail untuk mencocokkan icon dengan status-bar icon bawaan perangkat tanpa harus memperbesar seluruh overlay.
 
 | Parameter | Fungsi |
 |---|---|
 | Icon Size | Skala keseluruhan overlay |
 | Arc Thickness | Ketebalan battery ring |
 | Battery Text Size | Ukuran angka persentase |
-| Battery Text Weight | Ketebalan angka |
-| Wi-Fi Stroke | Ketebalan Wi-Fi |
-| Wi-Fi Offset | Posisi horizontal Wi-Fi pada Camera Hole Mode |
-| Cellular Dot Size | Ukuran titik sinyal operator |
-| X / Y Offset | Kalibrasi posisi terhadap status bar, notch, atau punch-hole |
+| Battery Text Weight | Bobot tipografi angka |
+| Wi-Fi Stroke | Ketebalan glyph Wi-Fi |
+| Wi-Fi Size | Skala glyph Wi-Fi tanpa mengubah ring |
+| Cellular Dot Size | Diameter titik SIM |
+| Wi-Fi Distance | Penyesuaian jarak pasangan angka + Wi-Fi pada Camera Hole Mode |
+| X / Y Offset | Kalibrasi terhadap status bar, notch, atau punch-hole |
 | Opacity | Transparansi overlay |
 
-**Prinsip desain:** jangan memperbesar seluruh icon hanya untuk membuat stroke terbaca. Gunakan parameter detail untuk mendapatkan komposisi **small-but-bold**.
+### Rekomendasi awal
 
-## ✦ Cara Menggunakan
+Untuk perangkat modern, mulai dari **30–34 dp**. Kemudian sesuaikan:
+
+1. Arc Thickness.
+2. Battery Text Size dan Weight.
+3. Wi-Fi Size dan Stroke.
+4. Cellular Dot Size.
+5. Baru terakhir X/Y Offset.
+
+Dengan urutan tersebut, pengguna tidak perlu mengubah posisi setiap kali ingin memperbaiki keterbacaan icon.
+
+## Cara Menggunakan
 
 1. Buka aplikasi.
 2. Tekan **START**.
-3. Izinkan **Tampil di atas aplikasi lain**.
-4. Atur **Icon Size**, X/Y, dan opacity.
-5. Cocokkan **Arc Thickness** dan **Battery Text** dengan icon status bar bawaan perangkat.
-6. Jika kamera punch-hole berada di tengah ring, aktifkan **Wi-Fi di luar ring**.
-7. Geser **Wi-Fi Offset** sampai Wi-Fi sejajar dengan angka baterai.
+3. Berikan izin **Tampil di atas aplikasi lain**.
+4. Atur ukuran dan posisi overlay.
+5. Samakan ketebalan arc serta angka dengan icon status bar perangkat.
+6. Untuk punch-hole di tengah ring, aktifkan **Wi-Fi di luar ring**.
+7. Atur ukuran/ketebalan Wi-Fi dan jarak pasangan angka + Wi-Fi.
 8. Tekan **SIMPAN & TERAPKAN**.
 
-> **Tip:** lakukan kalibrasi sambil membuka wallpaper/aplikasi dengan background terang dan gelap. Tujuannya mencari konfigurasi yang tetap terbaca pada keduanya.
+> **Tip:** kalibrasi pada wallpaper terang dan gelap. Jangan hanya mengoptimalkan satu kondisi background.
 
-## ✦ Adaptive Contrast
+## Adaptive Contrast
 
-AUTO Contrast menggunakan informasi wallpaper/system appearance yang tersedia Android untuk memilih foreground terang atau gelap, lalu memakai micro-halo untuk menjaga separation pada background kompleks.
+Adaptive contrast pada versi ini **tidak menggunakan MediaProjection atau screen recording**.
 
-Aplikasi **tidak menggunakan screen capture** untuk fungsi ini.
+- API 27+: `WallpaperColors` dipakai sebagai referensi luminance.
+- API 24–26: renderer menggunakan fallback system appearance.
+- Foreground dan micro-halo dibuat sebagai dua elemen berbeda sehingga bentuk tetap tajam tanpa shadow besar.
 
-## ✦ Privacy & Permissions
+Tujuan desainnya adalah **small-but-bold**: overlay tetap compact, tetapi garis dan angka tidak ikut menghilang ketika ukuran icon dikecilkan.
 
-Permission digunakan sesuai fungsi:
-
-- `SYSTEM_ALERT_WINDOW` — menampilkan overlay di atas aplikasi lain.
-- `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_SPECIAL_USE` — menjaga telemetry overlay tetap aktif sebagai foreground service.
-- `ACCESS_NETWORK_STATE` / `ACCESS_WIFI_STATE` — membaca status dan kekuatan Wi-Fi.
-- `READ_PHONE_STATE` — membaca informasi sinyal seluler yang diperlukan indikator cellular.
-- `POST_NOTIFICATIONS` — notification foreground service pada versi Android yang memerlukannya.
-
-Project tidak membutuhkan akses kontak, SMS, kamera, mikrofon, atau penyimpanan pribadi untuk fungsi telemetry utama.
-
-## ✦ Architecture
+## Architecture
 
 ```text
-MainActivity
-    │
-    ├── User configuration
-    ├── Permission flow
-    └── SharedPreferences
-            │
-            ▼
-StatusBarOverlayService
-    │
-    ├── Foreground Service
-    ├── WindowManager Overlay
-    └── CircularStatusView
-            │
-            └── Native Canvas Renderer
-                    ├── Battery
-                    ├── Wi-Fi
-                    ├── Cellular
-                    └── Adaptive Contrast
-
-SystemStatusMonitor
-    ├── Battery
-    ├── Wi-Fi
-    └── Cellular
+app/src/main/java/com/example/iosstatusbar/
+│
+├── CircularStatusView.kt
+│   └── Canvas geometry, typography, adaptive contrast
+│
+├── SystemStatusMonitor.kt
+│   └── Battery + Wi-Fi + dual-SIM telemetry
+│
+├── StatusBarOverlayService.kt
+│   └── Foreground overlay lifecycle + WindowManager layout
+│
+└── MainActivity.kt
+    └── Configuration UI + persistent preferences
 ```
 
-## ✦ Repository Structure
+## Engineering Principles
 
-```text
-.github/workflows/android.yml
-app/
-├── src/main/java/com/example/iosstatusbar/
-│   ├── CircularStatusView.kt
-│   ├── MainActivity.kt
-│   ├── StatusBarOverlayService.kt
-│   └── SystemStatusMonitor.kt
-└── src/main/res/
-    ├── drawable/
-    ├── layout/
-    ├── mipmap-anydpi-v26/
-    └── values/
-README.md
-build.gradle
-settings.gradle
-gradle.properties
-```
+**Native first.** Rendering tetap menggunakan Canvas dan primitive geometry.
 
-## ✦ Local Development
+**Telemetry separated from rendering.** Pengambilan status sistem dipisahkan dari renderer agar debugging dan pengembangan perangkat berbeda tetap terukur.
+
+**Device calibration over assumptions.** Punch-hole, density, status-bar inset, dan perilaku OEM dapat berbeda. Aplikasi menyediakan kontrol agar posisi dapat dikalibrasi dari perangkat nyata.
+
+**No unnecessary screen capture.** Versi utama tidak merekam layar dan tidak memerlukan MediaProjection hanya untuk adaptive contrast.
+
+**Lint must remain meaningful.** Compatibility issue diperbaiki melalui resource/API guards, bukan dengan mematikan lint.
+
+## Local Development
 
 ```bash
 git clone https://github.com/<owner>/<repository>.git
@@ -164,16 +150,24 @@ cd <repository>
 ./gradlew :app:assembleRelease
 ```
 
-## ✦ Continuous Integration
+## GitHub Actions
 
-GitHub Actions menjalankan:
+Workflow berada di:
+
+```text
+.github/workflows/android.yml
+```
+
+Pipeline utama:
 
 ```text
 Checkout
    ↓
-JDK 17 + Gradle
+JDK 17
    ↓
-Android Lint
+Gradle
+   ↓
+Lint Release
    ↓
 Release Build
    ↓
@@ -181,12 +175,12 @@ APK Verification
    ↓
 SHA-256
    ↓
-Artifact Upload
+Upload Artifact
    ↓
-README Build Metadata
+README build metadata
 ```
 
-Production signing dapat menggunakan GitHub Secrets:
+Release signing dapat menggunakan GitHub Secrets:
 
 ```text
 RELEASE_KEYSTORE_B64
@@ -195,50 +189,74 @@ RELEASE_KEY_ALIAS
 RELEASE_KEY_PASSWORD
 ```
 
-Jika secret release belum tersedia, workflow dapat menggunakan debug signing untuk testing sesuai konfigurasi repository.
+Tanpa release keystore secret, workflow dapat memakai debug signing untuk menghasilkan artifact installable untuk pengujian. Untuk distribusi produksi, gunakan release keystore yang dikelola dengan aman dan konsisten.
 
-## ✦ Community Collaboration
+## Community Collaboration
 
-Proyek ini dibangun dengan semangat **global open-source collaboration**. Kontribusi tidak harus berupa fitur besar. Issue kecil tentang density, notch, punch-hole, OEM behavior, accessibility, telemetry accuracy, rendering, dokumentasi, dan testing perangkat sangat bernilai.
+Proyek ini dibangun dengan semangat **open engineering**: perangkat nyata, pengujian lintas OEM, feedback visual, dan dokumentasi komunitas adalah bagian dari proses pengembangan.
 
-### Contribution workflow
+Kontribusi yang paling bernilai bukan hanya menambah fitur, tetapi juga memperbaiki akurasi telemetry, kompatibilitas perangkat, accessibility, efisiensi rendering, dokumentasi, dan automated testing.
 
-1. Fork repository.
-2. Buat branch:
-   `feature/<nama-fitur>`
-3. Jelaskan masalah dan alasan perubahan.
-4. Implementasikan perubahan sekecil dan sejelas mungkin.
-5. Jalankan lint dan build.
-6. Sertakan screenshot sebelum/sesudah jika perubahan bersifat visual.
-7. Buka Pull Request ke `main`.
+### Contribution Flow
 
-### Community principles
+```text
+Issue / Observation
+        ↓
+Reproduce on device
+        ↓
+Measure & document
+        ↓
+Implement minimal change
+        ↓
+Lint + build
+        ↓
+Pull Request
+        ↓
+Community review
+```
 
-- **Evidence over assumption** — ukur pada perangkat nyata jika membahas geometry atau telemetry.
-- **Small, reviewable changes** — hindari PR besar yang mencampur banyak tujuan.
-- **Document the why** — jelaskan alasan desain, bukan hanya perubahan kode.
-- **Respect device diversity** — Android memiliki banyak density, OEM, notch, dan punch-hole layout.
-- **Build together** — kritik teknis harus membantu proyek menjadi lebih baik.
+Saat membuka issue, sertakan bila memungkinkan:
 
-## ✦ Roadmap
+- model perangkat;
+- versi Android;
+- ukuran/density display;
+- screenshot sebelum dan sesudah;
+- konfigurasi overlay;
+- log atau lint error yang relevan.
 
-- [x] Native Canvas telemetry renderer
-- [x] Battery side arcs
-- [x] Wi-Fi RSSI indicator
-- [x] Cellular dot indicator
-- [x] Adjustable stroke/text calibration
-- [x] Camera Hole Mode
-- [x] Adaptive contrast without screen capture
-- [x] Premium configuration UI
-- [ ] Device-specific layout profiles
+Dengan data tersebut, perubahan dapat dibahas berdasarkan bukti, bukan asumsi.
+
+## Roadmap
+
+- [x] Native Canvas renderer
+- [x] Adjustable arc thickness
+- [x] Adjustable battery text size and weight
+- [x] Adjustable Wi-Fi size and stroke
+- [x] Camera Hole Mode dengan pasangan angka + Wi-Fi simetris
+- [x] Dual-SIM indicator rows
+- [x] API-safe adaptive contrast
+- [x] GitHub Actions validation and release artifact
+- [ ] Device-specific calibration profiles
 - [ ] Automated visual regression tests
 - [ ] Broader OEM telemetry compatibility
-- [ ] Release distribution through official Android channels
+- [ ] Official distribution and release-channel hardening
+
+## Privacy & Permissions
+
+Aplikasi membutuhkan permission yang relevan untuk fungsi overlay dan telemetri sistem, termasuk:
+
+- `SYSTEM_ALERT_WINDOW` untuk overlay;
+- `FOREGROUND_SERVICE` untuk menjaga service aktif;
+- `ACCESS_NETWORK_STATE` dan `ACCESS_WIFI_STATE` untuk status Wi-Fi;
+- `READ_PHONE_STATE` untuk telemetri sinyal SIM;
+- notification permission pada Android yang membutuhkannya untuk foreground service notification.
+
+Aplikasi tidak menggunakan MediaProjection untuk menggambar overlay maupun untuk adaptive contrast pada versi ini.
 
 ## License
 
-MIT License. See `LICENSE` when included by the repository maintainer.
+MIT License. Lihat file `LICENSE` pada repository untuk teks lisensi lengkap.
 
 ---
 
-**iOS Duo Status Bar — an open experiment in precise, compact Android telemetry UI.**
+**iOS Duo Status Bar — a community experiment in precise, compact Android telemetry UI.**

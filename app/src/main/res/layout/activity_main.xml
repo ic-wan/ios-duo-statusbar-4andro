@@ -37,7 +37,7 @@
                 android:paddingTop="6dp"
                 android:paddingEnd="12dp"
                 android:paddingBottom="6dp"
-                android:text="v5.2"
+                android:text="v5.3"
                 android:textColor="@color/duo_text"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -196,16 +196,18 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="18dp">
-                <TextView android:id="@+id/tvLabelLine" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ketebalan arc: 2.2 dp" android:textColor="@color/duo_text" android:textStyle="bold" />
-                <SeekBar android:id="@+id/seekLine" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="30" android:progress="12" />
-                <TextView android:id="@+id/tvLabelTextSize" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ukuran angka: 8.5 sp" android:textColor="@color/duo_text" android:textStyle="bold" />
-                <SeekBar android:id="@+id/seekTextSize" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="90" android:progress="35" />
-                <TextView android:id="@+id/tvLabelTextWeight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ketebalan angka: 700" android:textColor="@color/duo_text" android:textStyle="bold" />
-                <SeekBar android:id="@+id/seekTextWeight" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="50" android:progress="30" />
-                <TextView android:id="@+id/tvLabelWifiStroke" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ketebalan Wi-Fi: 1.9 dp" android:textColor="@color/duo_text" android:textStyle="bold" />
-                <SeekBar android:id="@+id/seekWifiStroke" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="25" android:progress="9" />
-                <TextView android:id="@+id/tvLabelDotSize" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ukuran titik operator: 2.0 dp" android:textColor="@color/duo_text" android:textStyle="bold" />
-                <SeekBar android:id="@+id/seekDotSize" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="30" android:progress="10" />
+                <TextView android:id="@+id/tvLabelLine" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ketebalan arc: 2.6 dp" android:textColor="@color/duo_text" android:textStyle="bold" />
+                <SeekBar android:id="@+id/seekLine" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="35" android:progress="16" />
+                <TextView android:id="@+id/tvLabelTextSize" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ukuran angka: 9.5 sp" android:textColor="@color/duo_text" android:textStyle="bold" />
+                <SeekBar android:id="@+id/seekTextSize" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="110" android:progress="45" />
+                <TextView android:id="@+id/tvLabelTextWeight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ketebalan angka: 800" android:textColor="@color/duo_text" android:textStyle="bold" />
+                <SeekBar android:id="@+id/seekTextWeight" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="50" android:progress="40" />
+                <TextView android:id="@+id/tvLabelWifiStroke" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ketebalan Wi-Fi: 2.1 dp" android:textColor="@color/duo_text" android:textStyle="bold" />
+                <SeekBar android:id="@+id/seekWifiStroke" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="28" android:progress="11" />
+                <TextView android:id="@+id/tvLabelWifiScale" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Ukuran Wi-Fi: 1.25×" android:textColor="@color/duo_text" android:textStyle="bold" />
+                <SeekBar android:id="@+id/seekWifiScale" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="100" android:progress="50" />
+                <TextView android:id="@+id/tvLabelDotSize" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ukuran titik operator: 3.0 dp" android:textColor="@color/duo_text" android:textStyle="bold" />
+                <SeekBar android:id="@+id/seekDotSize" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="30" android:progress="15" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -242,10 +244,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Untuk punch-hole di tengah: Wi-Fi dipindahkan ke samping angka baterai pada garis horizontal yang sama."
+                    android:text="Untuk punch-hole di tengah: Wi-Fi berada sejajar dengan angka baterai, dan keduanya ditempatkan simetris terhadap pusat ring."
                     android:textColor="@color/duo_secondary"
                     android:textSize="12sp" />
-                <TextView android:id="@+id/tvLabelWifiOffset" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Offset Wi-Fi: 0.0 dp" android:textColor="@color/duo_text" android:textStyle="bold" />
+                <TextView android:id="@+id/tvLabelWifiOffset" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Penyesuaian jarak Wi-Fi ↔ angka: 0.0 dp" android:textColor="@color/duo_text" android:textStyle="bold" />
                 <SeekBar android:id="@+id/seekWifiOffset" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="480" android:progress="240" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

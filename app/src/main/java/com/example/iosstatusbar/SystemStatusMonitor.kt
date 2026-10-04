@@ -11,18 +11,19 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
 import android.os.BatteryManager
-import android.os.Build
 import android.telephony.PhoneStateListener
 import android.telephony.SignalStrength
+import android.telephony.SubscriptionInfo
+import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import androidx.core.content.ContextCompat
 
 /**
- * Collects the minimum system telemetry required by the Duo overlay.
+ * Collects battery, Wi-Fi and cellular telemetry for the overlay.
  *
- * The implementation keeps minSdk 24 and deliberately avoids deprecated
- * connectivity broadcasts. Cellular monitoring uses PhoneStateListener as a
- * compatibility path; the deprecation is limited to that legacy Android API.
+ * Cellular is intentionally represented as two levels so dual-SIM devices can
+ * render SIM 1 above SIM 2. The legacy PhoneStateListener route is kept for
+ * minSdk 24 compatibility and is isolated here.
  */
 @Suppress("DEPRECATION")
 class SystemStatusMonitor(
@@ -32,18 +33,18 @@ class SystemStatusMonitor(
         isCharging: Boolean,
         isWifiConnected: Boolean,
         wifiSignalLevel: Int,
-        cellularSignalLevel: Int
+        cellularPrimaryLevel: Int,
+        cellularSecondaryLevel: Int,
+        hasSecondarySim: Boolean
     ) -> Unit
 ) {
-    private var cellularLevel: Int = 0
+    private var cellularPrimaryLevel = 0
+    private var cellularSecondaryLevel = 0
+    private var hasSecondarySim = false
     private var started = false
 
-    private val phoneListener = object : PhoneStateListener() {
-        override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
-            cellularLevel = signalStrength?.level?.coerceIn(0, 4) ?: 0
-            update()
-        }
-    }
+    private val phoneManagers = mutableListOf<TelephonyManager>()
+    private val phoneListeners = mutableListOf<PhoneStateListener>()
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
@@ -67,24 +68,85 @@ class SystemStatusMonitor(
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
 
-        registerCellularListenerIfAllowed()
+        registerCellularListeners()
         update()
     }
 
     @SuppressLint("MissingPermission")
-    private fun registerCellularListenerIfAllowed() {
+    private fun activeSubscriptions(): List<SubscriptionInfo> {
         if (ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.READ_PHONE_STATE
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            cellularLevel = 0
+            return emptyList()
+        }
+
+        return try {
+            val sm = context.getSystemService(SubscriptionManager::class.java)
+            sm?.activeSubscriptionInfoList
+                ?.sortedWith(compareBy<SubscriptionInfo> { it.simSlotIndex }.thenBy { it.subscriptionId })
+                ?.take(2)
+                ?: emptyList()
+        } catch (_: SecurityException) {
+            emptyList()
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun registerCellularListeners() {
+        stopCellularListeners()
+
+        if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.READ_PHONE_STATE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            cellularPrimaryLevel = 0
+            cellularSecondaryLevel = 0
+            hasSecondarySim = false
             return
         }
 
-        val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
-        tm?.listen(phoneListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
+        val subscriptions = activeSubscriptions()
+        hasSecondarySim = subscriptions.size >= 2
+
+        if (subscriptions.isEmpty()) {
+            // Fallback for devices that temporarily do not expose an active subscription list.
+            val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
+            if (tm != null) {
+                val listener = createListener(isPrimary = true)
+                phoneManagers += tm
+                phoneListeners += listener
+                tm.listen(listener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
+            }
+            return
+        }
+
+        subscriptions.forEachIndexed { index, info ->
+            val baseTm = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
+                ?: return@forEachIndexed
+            val tm = baseTm.createForSubscriptionId(info.subscriptionId)
+
+            val listener = createListener(isPrimary = index == 0)
+            phoneManagers += tm
+            phoneListeners += listener
+            tm.listen(listener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
+        }
     }
+
+    private fun createListener(isPrimary: Boolean): PhoneStateListener =
+        object : PhoneStateListener() {
+            override fun onSignalStrengthsChanged(signalStrength: SignalStrength?) {
+                val level = signalStrength?.level?.coerceIn(0, 4) ?: 0
+                if (isPrimary) {
+                    cellularPrimaryLevel = level
+                } else {
+                    cellularSecondaryLevel = level
+                }
+                update()
+            }
+        }
 
     @SuppressLint("MissingPermission")
     private fun update() {
@@ -98,7 +160,9 @@ class SystemStatusMonitor(
 
         val pct = if (level >= 0 && scale > 0) {
             (level * 100f / scale).toInt().coerceIn(0, 100)
-        } else 0
+        } else {
+            0
+        }
 
         val charging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
             status == BatteryManager.BATTERY_STATUS_FULL
@@ -117,7 +181,15 @@ class SystemStatusMonitor(
             0
         }
 
-        onStatusChanged(pct, charging, wifiConnected, wifiLevel, cellularLevel)
+        onStatusChanged(
+            pct,
+            charging,
+            wifiConnected,
+            wifiLevel,
+            cellularPrimaryLevel,
+            cellularSecondaryLevel,
+            hasSecondarySim
+        )
     }
 
     @SuppressLint("MissingPermission")
@@ -125,12 +197,9 @@ class SystemStatusMonitor(
         capabilities: NetworkCapabilities?,
         wifiManager: WifiManager
     ): Int {
-        // Android 10+ exposes signal strength through the active network without
-        // requiring MediaProjection or a location-based Wi-Fi scan.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val dbm = capabilities?.signalStrength ?: Int.MIN_VALUE
             if (dbm != Int.MIN_VALUE) {
-                // Typical Wi-Fi RSSI range is roughly -100..-30 dBm. Map it to 0..4.
                 return when {
                     dbm >= -55 -> 4
                     dbm >= -67 -> 3
@@ -141,31 +210,31 @@ class SystemStatusMonitor(
             }
         }
 
-        // Compatibility path for Android 7-9, where NetworkCapabilities.signalStrength
-        // is not available. ACCESS_WIFI_STATE is declared in the manifest.
         val rssi = wifiManager.connectionInfo.rssi
-        @Suppress("DEPRECATION")
         return WifiManager.calculateSignalLevel(rssi, 5).coerceIn(0, 4)
     }
 
     @SuppressLint("MissingPermission")
+    private fun stopCellularListeners() {
+        phoneManagers.forEachIndexed { index, tm ->
+            phoneListeners.getOrNull(index)?.let { listener ->
+                try {
+                    tm.listen(listener, PhoneStateListener.LISTEN_NONE)
+                } catch (_: Exception) {
+                }
+            }
+        }
+        phoneManagers.clear()
+        phoneListeners.clear()
+    }
+
     fun stop() {
         if (!started) return
         started = false
-
-        if (ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.READ_PHONE_STATE
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
-            tm?.listen(phoneListener, PhoneStateListener.LISTEN_NONE)
-        }
-
+        stopCellularListeners()
         try {
             context.unregisterReceiver(receiver)
         } catch (_: IllegalArgumentException) {
-            // Already unregistered.
         }
     }
 }
