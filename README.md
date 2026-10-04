@@ -6,7 +6,7 @@
 
 <!-- BUILD_META_START -->
 **Build terakhir:** akan diperbarui otomatis oleh GitHub Actions.  
-**Release:** `5.3.0`  
+**Release:** `5.3.1`  
 **Artifact:** tersedia di **Actions → Artifacts** setelah workflow selesai.
 <!-- BUILD_META_END -->
 
