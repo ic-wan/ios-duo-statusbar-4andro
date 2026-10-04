@@ -5,9 +5,10 @@
 > **Measure first. Render precisely. Document clearly. Improve together.**
 
 <!-- BUILD_META_START -->
-**Build terakhir:** akan diperbarui otomatis oleh GitHub Actions.  
-**Release:** `5.2.1`  
-**Artifact:** tersedia pada tab **Actions → Artifacts** setelah workflow selesai.
+**Build terakhir:** `2026-10-04 07:24:00 WIB`  
+**APK artifact:** `iOS_Duo_Status_Bar_20261004_072400.apk`  
+**SHA-256:** `5a34634fa397b1252baccb06c04ef9bdc66635a155337054c0bbdcb4999b0833`  
+**Run:** https://github.com/ic-wan/ios-duo-statusbar-4andro/actions/runs/37164705451
 <!-- BUILD_META_END -->
 
 ---
