@@ -92,6 +92,13 @@ class StatusBarOverlayService : Service() {
         val posX = prefs.getInt("pos_x", DEFAULT_X).coerceIn(0, 100)
         val posY = prefs.getInt("pos_y", DEFAULT_Y).coerceIn(MIN_Y, MAX_Y)
         val alpha = prefs.getInt("alpha", 100).coerceIn(20, 100)
+        val lineThickness = prefs.getInt("line_thickness_x10", 22) / 10f
+        val textSize = prefs.getInt("text_size_x10", 85) / 10f
+        val textWeight = prefs.getInt("text_weight", 700)
+        val wifiStroke = prefs.getInt("wifi_stroke_x10", 19) / 10f
+        val wifiOutside = prefs.getBoolean("wifi_outside", false)
+        val wifiOffset = prefs.getInt("wifi_offset_x10", 0) / 10f
+        val dotSize = prefs.getInt("dot_size_x10", 20) / 10f
 
         val p = params ?: return
         p.width = sizeDp.dp()
@@ -99,6 +106,15 @@ class StatusBarOverlayService : Service() {
         p.x = posX.dp()
         p.y = posY.dp()
         overlayView.alpha = alpha / 100f
+
+        val view = overlayView.findViewById<CircularStatusView>(R.id.circularStatusView)
+        view.lineThicknessDp = lineThickness
+        view.batteryTextSizeSp = textSize
+        view.batteryTextWeight = textWeight
+        view.wifiStrokeDp = wifiStroke
+        view.wifiOutsideRing = wifiOutside
+        view.wifiOutsideOffsetDp = wifiOffset
+        view.cellularDotDp = dotSize
     }
 
     private fun Int.dp(): Int = (this * resources.displayMetrics.density).toInt()

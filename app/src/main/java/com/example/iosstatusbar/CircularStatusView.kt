@@ -46,7 +46,39 @@ class CircularStatusView @JvmOverloads constructor(
     var isCharging: Boolean = false
         set(value) { field = value; invalidate() }
 
+    /** User-tunable renderer settings. */
+    var lineThicknessDp: Float = 2.2f
+        set(value) { field = value.coerceIn(1.0f, 4.0f); invalidate() }
+
+    var batteryTextSizeSp: Float = 8.5f
+        set(value) { field = value.coerceIn(5.0f, 14.0f); invalidate() }
+
+    /** 400..900, mapped to Android font weights where available. */
+    var batteryTextWeight: Int = 700
+        set(value) { field = value.coerceIn(400, 900); updateNumberTypeface(); invalidate() }
+
+    /** Wi-Fi can be moved outside the battery ring to leave the camera-hole center clear. */
+    var wifiOutsideRing: Boolean = false
+        set(value) { field = value; invalidate() }
+
+    /** Horizontal offset, in dp, relative to the center of the overlay. */
+    var wifiOutsideOffsetDp: Float = 0f
+        set(value) { field = value.coerceIn(-24f, 24f); invalidate() }
+
+    var wifiStrokeDp: Float = 1.9f
+        set(value) { field = value.coerceIn(1.0f, 3.5f); invalidate() }
+
+    var cellularDotDp: Float = 2.0f
+        set(value) { field = value.coerceIn(1.0f, 4.0f); invalidate() }
+
     private val arcRect = RectF()
+
+    private fun dp(value: Float): Float = value * resources.displayMetrics.density
+
+    private fun updateNumberTypeface() {
+        number.typeface = Typeface.create("sans-serif", batteryTextWeight)
+        numberHalo.typeface = Typeface.create("sans-serif", batteryTextWeight)
+    }
 
     private val foreground = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
@@ -164,22 +196,23 @@ class CircularStatusView @JvmOverloads constructor(
 
         val size = min(width, height).toFloat()
         val cx = width / 2f
-        // The composition is deliberately top-biased: this gives the icon a clean
-        // relationship with a punch-hole/notch when the overlay is moved upward.
         val cy = height * 0.54f
         val radius = size * 0.385f
-        val stroke = (size * 0.047f).coerceIn(1.35f, 3.0f)
-        val haloStroke = stroke * 1.70f
 
-        // ─────────────────────────────────────────────
-        // 1) BATTERY: percentage above + two premium side arcs.
-        //    Each side fills upward from the lower tip according to batteryPct.
-        // ─────────────────────────────────────────────
-        val textSize = (size * 0.155f).coerceIn(5.0f, 10.5f)
+        // Keep the core stroke visually strong even when the whole overlay is small.
+        val stroke = dp(lineThicknessDp).coerceIn(dp(1.0f), dp(4.0f))
+        val haloStroke = (stroke * 1.18f).coerceAtLeast(dp(2.35f))
+
+        // Battery percentage: independent size + weight controls.
+        val textSize = dp(batteryTextSizeSp * 0.82f).coerceIn(dp(5.0f), dp(14.0f))
+        updateNumberTypeface()
         number.textSize = textSize
         numberHalo.textSize = textSize
-        numberHalo.strokeWidth = maxOf(1.0f, stroke * 0.52f)
-        val textY = cy - radius * 0.78f
+        numberHalo.strokeWidth = maxOf(dp(0.45f), stroke * 0.22f)
+
+        // In camera-hole mode the Wi-Fi indicator shares the same horizontal row
+        // as the battery percentage, rather than stacking above it.
+        val textY = cy - radius * 0.82f
         drawTextWithHalo(canvas, batteryPct.toString(), cx, textY)
 
         val batteryRect = RectF(
@@ -193,55 +226,118 @@ class CircularStatusView @JvmOverloads constructor(
         val sideSweep = 76f
         val activeSweep = sideSweep * (batteryPct / 100f)
 
-        // Dim complete tracks establish the elegant bracket silhouette.
         drawArcTrack(canvas, 140f, sideSweep, stroke, haloStroke)
         drawArcTrack(canvas, 40f, -sideSweep, stroke, haloStroke)
 
-        // Active battery energy, mirrored left/right for a balanced Duo shape.
         drawArcActive(canvas, 140f, activeSweep, stroke, haloStroke)
         drawArcActive(canvas, 40f, -activeSweep, stroke, haloStroke)
 
         // ─────────────────────────────────────────────
-        // 2) WI-FI: three nested arcs + center dot.
-        //    When disconnected every bar becomes hollow/dim.
+        // WI-FI
+        // Standard mode: inside the battery ring.
+        // Camera-hole mode: outside the ring, horizontally aligned
+        // with the battery percentage.
         // ─────────────────────────────────────────────
-        val wifiCy = cy + radius * 0.08f
-        val wifiStroke = (stroke * 0.82f).coerceAtLeast(1.2f)
+        val wifiStroke = dp(wifiStrokeDp).coerceIn(dp(1.0f), dp(3.5f))
+
+        val wifiCx: Float
+        val wifiCy: Float
+
+        if (wifiOutsideRing) {
+            val horizontalGap = radius * 0.95f
+            wifiCx = cx + horizontalGap + dp(wifiOutsideOffsetDp)
+            wifiCy = textY - dp(1.0f)
+        } else {
+            wifiCx = cx
+            wifiCy = cy + radius * 0.05f
+        }
+
+        // Three clearly readable nested arcs.
+        val wifiBaseR = if (wifiOutsideRing) radius * 0.26f else radius * 0.17f
+        val wifiStep = if (wifiOutsideRing) radius * 0.075f else radius * 0.065f
         val wifiSweep = 104f
+
         for (i in 1..3) {
-            val r = radius * (0.105f + i * 0.075f)
-            arcRect.set(cx - r, wifiCy - r, cx + r, wifiCy + r)
+            val r = wifiBaseR + (i - 1) * wifiStep
+            arcRect.set(
+                wifiCx - r,
+                wifiCy - r,
+                wifiCx + r,
+                wifiCy + r
+            )
+
             val active = isWifiConnected && i <= wifiSignalLevel
+
             if (active) {
-                drawArcActive(canvas, 218f, wifiSweep, wifiStroke, wifiStroke * 1.55f)
+                drawArcActive(
+                    canvas,
+                    218f,
+                    wifiSweep,
+                    wifiStroke,
+                    wifiStroke * 1.22f
+                )
             } else {
-                drawArcTrack(canvas, 218f, wifiSweep, wifiStroke, wifiStroke * 1.55f)
+                drawArcTrack(
+                    canvas,
+                    218f,
+                    wifiSweep,
+                    wifiStroke,
+                    wifiStroke * 1.22f
+                )
             }
         }
 
-        val wifiDotRadius = (radius * 0.038f).coerceAtLeast(1.15f)
-        val wifiDotY = wifiCy + radius * 0.10f
-        canvas.drawCircle(cx, wifiDotY, wifiDotRadius * 1.55f, haloFill)
+        val wifiDotRadius = if (wifiOutsideRing) {
+            dp(1.35f)
+        } else {
+            maxOf(radius * 0.038f, dp(1.25f))
+        }
+
+        val wifiDotY = wifiCy + if (wifiOutsideRing) dp(2.2f) else radius * 0.10f
+
         canvas.drawCircle(
-            cx,
+            wifiCx,
+            wifiDotY,
+            wifiDotRadius * 1.30f,
+            haloFill
+        )
+
+        canvas.drawCircle(
+            wifiCx,
             wifiDotY,
             wifiDotRadius,
-            if (isWifiConnected && wifiSignalLevel > 0) foregroundFill else trackFill
+            if (isWifiConnected && wifiSignalLevel > 0) {
+                foregroundFill
+            } else {
+                trackFill
+            }
         )
 
         // ─────────────────────────────────────────────
-        // 3) CELLULAR: four dots on a shallow lower arc.
-        //    Number of bright dots equals signal strength 0..4.
+        // CELLULAR: four dots on a shallow lower arc.
         // ─────────────────────────────────────────────
-        val dotRadius = (radius * 0.043f).coerceAtLeast(1.2f)
+        val dotRadius = dp(cellularDotDp * 0.5f)
         val dotArcRadius = radius * 0.77f
         val angles = floatArrayOf(58f, 76f, 94f, 112f)
+
         for (i in angles.indices) {
             val rad = Math.toRadians(angles[i].toDouble())
             val x = cx + dotArcRadius * cos(rad).toFloat()
             val y = cy + dotArcRadius * sin(rad).toFloat()
-            canvas.drawCircle(x, y, dotRadius * 1.55f, haloFill)
-            canvas.drawCircle(x, y, dotRadius, if (i < cellularSignalLevel) foregroundFill else trackFill)
+
+            canvas.drawCircle(
+                x,
+                y,
+                dotRadius * 1.28f,
+                haloFill
+            )
+
+            canvas.drawCircle(
+                x,
+                y,
+                dotRadius,
+                if (i < cellularSignalLevel) foregroundFill else trackFill
+            )
         }
     }
 

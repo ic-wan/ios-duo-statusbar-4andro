@@ -1,239 +1,191 @@
 # iOS Duo Status Bar for Android
 
-> **A compact, native Android system-telemetry overlay inspired by the visual language of premium mobile status indicators.**
+> **A compact, native Android telemetry overlay inspired by the visual language of premium mobile status indicators.**
 >
-> Built to be explored, improved, and extended together by the Android developer community.
+> **Measure first. Render precisely. Document clearly. Improve together.**
 
 <!-- BUILD_META_START -->
-**Build terakhir:** `2026-10-04 02:18:21 WIB`  
-**APK artifact:** `iOS_Duo_Status_Bar_20261004_021821.apk`  
-**SHA-256:** `eb03b9924fd49dd6777b935c55251ae8091f920bd8cf18a41dc536a22518620f`  
-**Run:** https://github.com/ic-wan/ios-duo-statusbar-4andro/actions/runs/37147206833
+**Build terakhir:** akan diperbarui otomatis oleh GitHub Actions.  
+**Release:** `5.2.0`  
+**Artifact:** tersedia pada tab **Actions → Artifacts** setelah workflow selesai.
 <!-- BUILD_META_END -->
 
 ---
 
 ## ✦ Project Vision
 
-iOS Duo Status Bar adalah proyek **open-source, community-driven** untuk menghadirkan satu indikator telemetri yang sangat ringkas di area atas layar Android.
+iOS Duo Status Bar adalah proyek **open-source, community-driven** untuk menghadirkan indikator telemetri sistem yang ringkas, tajam, dan dapat dikalibrasi di area atas layar Android.
 
-Alih-alih memakai bitmap atau library UI pihak ketiga untuk bentuk indikator utama, proyek ini menggambar seluruh komposisi melalui **native Kotlin Canvas + vector geometry**. Tujuannya sederhana: bentuk tetap tajam pada berbagai density, animasi/perubahan status terasa instan, dan footprint aplikasi tetap kecil.
+Seluruh indikator utama dirender menggunakan **native Kotlin Canvas + vector geometry**. Tidak ada bitmap telemetry untuk rendering overlay. Tujuannya adalah mempertahankan ketajaman pada berbagai density, menjaga penggunaan resource tetap rasional, dan memberi ruang bagi komunitas untuk bereksperimen dengan geometry, telemetry, dan perangkat yang berbeda.
 
-Proyek ini **tidak berafiliasi dengan Apple** dan tidak menggunakan aset proprietary Apple. Nama "Duo" mengacu pada konsep komposisi dua sisi pada indikator overlay yang menjadi inspirasi visual proyek ini.
+Proyek ini **tidak berafiliasi dengan Apple**, tidak menggunakan aset proprietary Apple, dan menggunakan istilah “Duo” sebagai nama konsep visual komposisi indikator.
 
-### Design goals
-
-- **Minimal** — hanya satu komposisi kecil untuk tiga telemetry utama.
-- **Precise** — geometry dikontrol langsung melalui Canvas.
-- **Elegant** — stroke tipis, rounded caps, spacing konsisten, dan micro-halo.
-- **Readable** — foreground hitam/putih dipadukan dengan halo kontras.
-- **Compact** — ukuran overlay dapat diturunkan hingga **24 dp**.
-- **Status-aware** — battery, Wi-Fi, dan cellular signal diperbarui dari telemetry Android.
-- **Community-first** — source code, dokumentasi, CI, dan roadmap terbuka untuk kontribusi.
-
----
-
-## ◉ Visual Language
-
-Komposisi indikator mengikuti struktur berikut:
+## ✦ Visual System
 
 ```text
-                    57
+                    57       Wi-Fi*
 
-             ╭             ╮
-             │    Wi-Fi    │
-             │     ╭─╮     │
-             │     ╰●╯     │
-             │             │
-                •  •  •  •
+              ╭────────────╮  ╭──╮
+            ╭                ╮╭────╮
+           │                  ╰──●─╯
+            ╰                ╯
+              •    •    •    •
 
-             BATTERY  →  side arcs
-             Wi-Fi    →  3 nested arcs
-             CELLULAR →  4 lower dots
+       Battery  → side arcs + percentage
+       Wi-Fi    → 3 nested arcs + center dot
+       Cellular → 4 lower dots
+
+* Camera Hole Mode: Wi-Fi berada di luar ring dan sejajar
+  horizontal dengan angka baterai.
 ```
 
-### 1. Battery
+### Battery
+- Angka persentase berada di atas ring.
+- Dua side-arc simetris membentuk satu indikator baterai.
+- Panjang arc aktif mengikuti persentase baterai.
+- Ketebalan arc, ukuran angka, dan weight angka dapat diatur independen.
 
-- Persentase baterai ditampilkan sebagai angka kecil di bagian atas.
-- Dua **side arcs simetris** membentuk siluet Duo.
-- Panjang bagian aktif mengikuti persentase baterai.
-- Track redup tetap terlihat sehingga bentuk indikator tidak kehilangan struktur ketika level baterai rendah.
+### Wi-Fi
+- Tiga nested arcs menunjukkan level RSSI.
+- Terhubung: jumlah arc aktif mengikuti kekuatan jaringan.
+- Tidak terhubung: indikator menjadi dim/kosong.
+- **Camera Hole Mode** memindahkan Wi-Fi ke sisi angka baterai pada satu garis horizontal, sehingga pusat ring dapat dibiarkan kosong untuk punch-hole kamera.
 
-### 2. Wi-Fi
+### Cellular
+- Empat titik mengikuti kurva bawah.
+- Jumlah titik aktif mengikuti level sinyal operator.
+- Ukuran titik dapat dikalibrasi agar sebanding dengan status-bar icon perangkat.
 
-- Terdiri dari **tiga nested arcs** dan satu center dot.
-- Jumlah arc aktif mengikuti kekuatan RSSI Wi-Fi.
-- Jika perangkat tidak terhubung ke Wi-Fi, indikator menjadi kosong/dim.
+## ✦ Premium Calibration
+
+v5.2 memisahkan parameter visual yang sebelumnya saling bergantung:
+
+| Parameter | Fungsi |
+|---|---|
+| Icon Size | Skala keseluruhan overlay |
+| Arc Thickness | Ketebalan battery ring |
+| Battery Text Size | Ukuran angka persentase |
+| Battery Text Weight | Ketebalan angka |
+| Wi-Fi Stroke | Ketebalan Wi-Fi |
+| Wi-Fi Offset | Posisi horizontal Wi-Fi pada Camera Hole Mode |
+| Cellular Dot Size | Ukuran titik sinyal operator |
+| X / Y Offset | Kalibrasi posisi terhadap status bar, notch, atau punch-hole |
+| Opacity | Transparansi overlay |
+
+**Prinsip desain:** jangan memperbesar seluruh icon hanya untuk membuat stroke terbaca. Gunakan parameter detail untuk mendapatkan komposisi **small-but-bold**.
+
+## ✦ Cara Menggunakan
+
+1. Buka aplikasi.
+2. Tekan **START**.
+3. Izinkan **Tampil di atas aplikasi lain**.
+4. Atur **Icon Size**, X/Y, dan opacity.
+5. Cocokkan **Arc Thickness** dan **Battery Text** dengan icon status bar bawaan perangkat.
+6. Jika kamera punch-hole berada di tengah ring, aktifkan **Wi-Fi di luar ring**.
+7. Geser **Wi-Fi Offset** sampai Wi-Fi sejajar dengan angka baterai.
+8. Tekan **SIMPAN & TERAPKAN**.
+
+> **Tip:** lakukan kalibrasi sambil membuka wallpaper/aplikasi dengan background terang dan gelap. Tujuannya mencari konfigurasi yang tetap terbaca pada keduanya.
+
+## ✦ Adaptive Contrast
+
+AUTO Contrast menggunakan informasi wallpaper/system appearance yang tersedia Android untuk memilih foreground terang atau gelap, lalu memakai micro-halo untuk menjaga separation pada background kompleks.
+
+Aplikasi **tidak menggunakan screen capture** untuk fungsi ini.
+
+## ✦ Privacy & Permissions
+
+Permission digunakan sesuai fungsi:
+
+- `SYSTEM_ALERT_WINDOW` — menampilkan overlay di atas aplikasi lain.
+- `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_SPECIAL_USE` — menjaga telemetry overlay tetap aktif sebagai foreground service.
+- `ACCESS_NETWORK_STATE` / `ACCESS_WIFI_STATE` — membaca status dan kekuatan Wi-Fi.
+- `READ_PHONE_STATE` — membaca informasi sinyal seluler yang diperlukan indikator cellular.
+- `POST_NOTIFICATIONS` — notification foreground service pada versi Android yang memerlukannya.
+
+Project tidak membutuhkan akses kontak, SMS, kamera, mikrofon, atau penyimpanan pribadi untuk fungsi telemetry utama.
+
+## ✦ Architecture
 
 ```text
-Wi-Fi kuat       ╭───╮
-                 ╰───╯
-                   ●
+MainActivity
+    │
+    ├── User configuration
+    ├── Permission flow
+    └── SharedPreferences
+            │
+            ▼
+StatusBarOverlayService
+    │
+    ├── Foreground Service
+    ├── WindowManager Overlay
+    └── CircularStatusView
+            │
+            └── Native Canvas Renderer
+                    ├── Battery
+                    ├── Wi-Fi
+                    ├── Cellular
+                    └── Adaptive Contrast
 
-Wi-Fi lemah      ╭─╮
-                  ╰●
-
-Wi-Fi disconnected
-                  ·
+SystemStatusMonitor
+    ├── Battery
+    ├── Wi-Fi
+    └── Cellular
 ```
 
-### 3. Cellular
-
-- Empat titik disusun mengikuti **lower shallow arc**.
-- 0–4 titik aktif menunjukkan level sinyal operator.
-- Sistem menggunakan `TelephonyManager` / `SignalStrength` untuk memperoleh level sinyal.
-
----
-
-## ✧ Adaptive Contrast
-
-Mode `AUTO` dirancang untuk menjaga ikon tetap terlihat pada wallpaper yang terang maupun gelap tanpa meminta akses screen capture.
-
-Prioritas pemilihan warna:
-
-1. Membaca `WallpaperColors` Android pada API 27+ dengan runtime API guard; Android 7.0–8.0 tetap memakai fallback theme/light-dark.
-2. Menghitung luminance relatif dari warna wallpaper.
-3. Memilih foreground **putih** pada latar gelap atau **hitam** pada latar terang.
-4. Menambahkan **micro-halo** berlawanan warna untuk mempertahankan edge definition.
-5. Jika warna wallpaper tidak tersedia, mode terang/gelap sistem digunakan sebagai fallback.
-
-> **Catatan teknis:** mode ini membaca karakteristik wallpaper, bukan pixel aplikasi yang sedang berada di belakang overlay. Pixel-perfect adaptation terhadap aplikasi lain memerlukan `MediaProjection`, yang sengaja tidak menjadi dependency default karena akan menambah permission, resource usage, dan kompleksitas privacy.
-
----
-
-## ⚙ Overlay Configuration
-
-Overlay dapat dikalibrasi untuk notch, punch-hole, atau status-bar layout perangkat yang berbeda.
-
-| Parameter | Rentang | Fungsi |
-|---|---:|---|
-| **Ukuran ikon** | 24–100 dp | Mengatur footprint indikator |
-| **Offset kanan X** | 0–100 dp | Menggeser indikator dari tepi kanan |
-| **Offset vertikal Y** | −48–80 dp | Memungkinkan indikator dinaikkan masuk ke area status bar |
-| **Opasitas** | 20–100% | Mengatur transparansi overlay |
-
-Nilai default dirancang sebagai titik awal untuk perangkat dengan punch-hole/status-bar modern, tetapi posisi terbaik tetap bergantung pada OEM, density, dan konfigurasi status bar perangkat.
-
----
-
-## 🏗 Architecture
+## ✦ Repository Structure
 
 ```text
-Android System Telemetry
-          │
-          ├── BatteryManager
-          ├── ConnectivityManager / WifiManager
-          └── TelephonyManager / SignalStrength
-          │
-          ▼
-┌──────────────────────────────┐
-│    SystemStatusMonitor       │
-└──────────────┬───────────────┘
-               │
-               ▼
-┌──────────────────────────────┐
-│ StatusBarOverlayService      │
-│ Foreground + System Overlay   │
-└──────────────┬───────────────┘
-               │
-               ▼
-┌──────────────────────────────┐
-│ CircularStatusView            │
-│ Native Canvas / Vector        │
-│ Geometry / Adaptive Contrast  │
-└──────────────────────────────┘
-```
-
-### Repository structure
-
-```text
-app/src/main/java/com/example/iosstatusbar/
-├── CircularStatusView.kt
-│   └── Premium Canvas renderer
-├── MainActivity.kt
-│   └── Configuration / permissions / controls
-├── StatusBarOverlayService.kt
-│   └── Foreground overlay lifecycle
-└── SystemStatusMonitor.kt
-    └── Battery / Wi-Fi / cellular telemetry
-
 .github/workflows/android.yml
-└── Automated CI/CD build + artifact + README metadata
+app/
+├── src/main/java/com/example/iosstatusbar/
+│   ├── CircularStatusView.kt
+│   ├── MainActivity.kt
+│   ├── StatusBarOverlayService.kt
+│   └── SystemStatusMonitor.kt
+└── src/main/res/
+    ├── drawable/
+    ├── layout/
+    ├── mipmap-anydpi-v26/
+    └── values/
+README.md
+build.gradle
+settings.gradle
+gradle.properties
 ```
 
----
-
-## 🔐 Permissions & Privacy
-
-The application uses only the permissions required by the overlay and telemetry architecture:
-
-- `SYSTEM_ALERT_WINDOW` — menampilkan indikator di atas aplikasi lain.
-- `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_SPECIAL_USE` — menjaga lifecycle overlay pada Android modern.
-- `ACCESS_NETWORK_STATE` / `ACCESS_WIFI_STATE` — membaca konektivitas dan Wi-Fi RSSI.
-- `READ_PHONE_STATE` — indikator kekuatan sinyal seluler melalui API telephony yang tersedia pada perangkat. — memperoleh cellular signal information.
-- `POST_NOTIFICATIONS` — notifikasi foreground service pada Android yang mendukung permission tersebut.
-
-**Tidak ada screen recording sebagai bagian dari arsitektur default.**
-
----
-
-
-### Android API compatibility and lint policy
-
-Release `2.2.0` keeps `minSdk 24` while using newer platform APIs only behind explicit runtime guards. `WallpaperManager.getWallpaperColors()` is available from API 27, so the renderer falls back safely on Android 7.0–8.0. Wallpaper color lookup is performed off the UI thread and cached before rendering, avoiding an IPC call on every Canvas frame.
-
-The telemetry layer also avoids the deprecated `CONNECTIVITY_ACTION` broadcast. Cellular monitoring retains the legacy `PhoneStateListener` compatibility path for older devices and confines its deprecation to that compatibility layer.
-
-## 🚀 Build Locally
-
-Requirements:
-
-- Android Studio modern
-- JDK 17
-- Android SDK 35
-- Gradle Wrapper generated/committed by the project
+## ✦ Local Development
 
 ```bash
-git clone https://github.com/<YOUR-OWNER>/<YOUR-REPOSITORY>.git
-cd <YOUR-REPOSITORY>
-
-./gradlew lintRelease
-./gradlew assembleRelease
+git clone https://github.com/<owner>/<repository>.git
+cd <repository>
+./gradlew :app:lintRelease
+./gradlew :app:assembleRelease
 ```
 
-APK output:
+## ✦ Continuous Integration
 
-```text
-app/build/outputs/apk/release/app-release.apk
-```
-
----
-
-## 🤖 GitHub Actions CI/CD
-
-Setiap push ke branch utama/development atau `workflow_dispatch` dapat menjalankan pipeline:
+GitHub Actions menjalankan:
 
 ```text
 Checkout
    ↓
 JDK 17 + Gradle
    ↓
-Lint Release
+Android Lint
    ↓
-Release Signing / Debug Fallback
+Release Build
    ↓
-assembleRelease
+APK Verification
    ↓
-APK Naming + SHA-256
+SHA-256
    ↓
-Upload Artifact
+Artifact Upload
    ↓
 README Build Metadata
 ```
 
-### Release signing
-
-Untuk menghasilkan APK release dengan signing key milik project, buat GitHub Actions Secrets berikut:
+Production signing dapat menggunakan GitHub Secrets:
 
 ```text
 RELEASE_KEYSTORE_B64
@@ -242,99 +194,50 @@ RELEASE_KEY_ALIAS
 RELEASE_KEY_PASSWORD
 ```
 
-Tanpa secrets tersebut, CI menggunakan debug keystore agar contributor tetap dapat memperoleh APK installable untuk testing.
+Jika secret release belum tersedia, workflow dapat menggunakan debug signing untuk testing sesuai konfigurasi repository.
 
-> Untuk distribusi production, gunakan release keystore yang disimpan sebagai GitHub Secret. Jangan commit keystore atau password ke repository.
+## ✦ Community Collaboration
 
----
-
-## 🌍 Community Collaboration
-
-Proyek ini sengaja dibuat sebagai **open engineering project**, bukan sekadar APK sekali jadi.
-
-Kami mengundang developer, UI/UX designer, Android performance engineer, QA tester, technical writer, dan contributor dari berbagai negara untuk membantu mengembangkan indikator ini.
-
-### Contribution ideas
-
-- 📐 penyempurnaan vector geometry
-- 📱 optimasi positioning untuk Samsung / Pixel / Xiaomi / OnePlus dan OEM lainnya
-- 🎨 adaptive contrast dan color science
-- 📡 peningkatan akurasi Wi-Fi/cellular telemetry
-- ⚡ rendering & battery-efficiency profiling
-- ♿ accessibility dan readability
-- 🧪 automated UI/device testing
-- 📚 dokumentasi dan multilingual README
-- 🐛 bug reports dan reproducible test cases
+Proyek ini dibangun dengan semangat **global open-source collaboration**. Kontribusi tidak harus berupa fitur besar. Issue kecil tentang density, notch, punch-hole, OEM behavior, accessibility, telemetry accuracy, rendering, dokumentasi, dan testing perangkat sangat bernilai.
 
 ### Contribution workflow
 
-```bash
-git checkout -b feature/your-improvement
+1. Fork repository.
+2. Buat branch:
+   `feature/<nama-fitur>`
+3. Jelaskan masalah dan alasan perubahan.
+4. Implementasikan perubahan sekecil dan sejelas mungkin.
+5. Jalankan lint dan build.
+6. Sertakan screenshot sebelum/sesudah jika perubahan bersifat visual.
+7. Buka Pull Request ke `main`.
 
-# implement + test
-./gradlew lintRelease
-./gradlew assembleRelease
+### Community principles
 
-git add .
-git commit -m "feat: describe your improvement"
-git push origin feature/your-improvement
-```
+- **Evidence over assumption** — ukur pada perangkat nyata jika membahas geometry atau telemetry.
+- **Small, reviewable changes** — hindari PR besar yang mencampur banyak tujuan.
+- **Document the why** — jelaskan alasan desain, bukan hanya perubahan kode.
+- **Respect device diversity** — Android memiliki banyak density, OEM, notch, dan punch-hole layout.
+- **Build together** — kritik teknis harus membantu proyek menjadi lebih baik.
 
-Kemudian buat **Pull Request** ke branch `main` dan jelaskan:
+## ✦ Roadmap
 
-1. masalah yang ingin diselesaikan;
-2. pendekatan teknis yang digunakan;
-3. perangkat/API level yang diuji;
-4. dampak terhadap performance;
-5. screenshot/video jika perubahan bersifat visual.
+- [x] Native Canvas telemetry renderer
+- [x] Battery side arcs
+- [x] Wi-Fi RSSI indicator
+- [x] Cellular dot indicator
+- [x] Adjustable stroke/text calibration
+- [x] Camera Hole Mode
+- [x] Adaptive contrast without screen capture
+- [x] Premium configuration UI
+- [ ] Device-specific layout profiles
+- [ ] Automated visual regression tests
+- [ ] Broader OEM telemetry compatibility
+- [ ] Release distribution through official Android channels
 
-### Community principle
+## License
 
-> **Measure first. Render precisely. Document clearly. Improve together.**
-
-Setiap kontribusi yang baik seharusnya membuat proyek ini lebih akurat, lebih ringan, lebih kompatibel, atau lebih mudah dikembangkan oleh contributor berikutnya.
-
----
-
-## 🗺 Roadmap
-
-### Phase 1 — Core Overlay
-
-- [x] Native Canvas renderer
-- [x] Battery percentage + Duo side arcs
-- [x] Wi-Fi 3-level visual telemetry
-- [x] Cellular 4-dot telemetry
-- [x] Compact 24–100 dp scaling
-- [x] Negative Y positioning
-- [x] Adaptive wallpaper contrast
-- [x] Foreground service architecture
-
-### Phase 2 — Device Excellence
-
-- [ ] Device-specific calibration profiles
-- [ ] Punch-hole / notch presets
-- [ ] More precise cellular state handling
-- [ ] Performance profiling on multiple OEMs
-- [ ] Automated screenshot regression tests
-
-### Phase 3 — Advanced Visual Engine
-
-- [ ] Optional pixel-aware contrast experiment using MediaProjection
-- [ ] Smooth telemetry transitions
-- [ ] More refined color adaptation
-- [ ] User-selectable visual themes
-- [ ] Accessibility-aware scaling
-
-Advanced features will be introduced only when they can improve the experience without unnecessarily increasing permission scope or resource consumption.
+MIT License. See `LICENSE` when included by the repository maintainer.
 
 ---
 
-## 📜 License
-
-This project is distributed under the **MIT License**. See `LICENSE` for details.
-
----
-
-## Disclaimer
-
-This project is an independent open-source Android project. It is **not affiliated with, endorsed by, or sponsored by Apple Inc.** or any other device manufacturer.
+**iOS Duo Status Bar — an open experiment in precise, compact Android telemetry UI.**

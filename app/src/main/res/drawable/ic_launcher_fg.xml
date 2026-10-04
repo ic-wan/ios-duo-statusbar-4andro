@@ -3,7 +3,17 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,20 A28,28 0,1 0,54.01,20 M54,40 C61.5,40 68.3,42.8 73.5,47.6 L69.2,51.8 C65.2,48.1 59.9,46 54,46 C48.1,46 42.8,48.1 38.8,51.8 L34.5,47.6 C39.7,42.8 46.5,40 54,40 Z M54,55 A4,4 0,1 0,54.01,55 M40,75 A2.5,2.5 0,1 0,40.01,75 M49.3,75 A2.5,2.5 0,1 0,49.31,75 M58.7,75 A2.5,2.5 0,1 0,58.71,75 M68,75 A2.5,2.5 0,1 0,68.01,75"/>
+    <!-- Premium Duo ring -->
+    <path android:fillColor="@android:color/transparent" android:strokeColor="#FFFFFF" android:strokeWidth="6"
+        android:strokeLineCap="round" android:pathData="M22,58 A32,32 0,0 1,86,58" />
+    <path android:fillColor="@android:color/transparent" android:strokeColor="#FFFFFF" android:strokeWidth="6"
+        android:strokeLineCap="round" android:pathData="M22,58 A32,32 0,0 0,86,58" />
+    <!-- Wi-Fi -->
+    <path android:fillColor="@android:color/transparent" android:strokeColor="#FFFFFF" android:strokeWidth="5"
+        android:strokeLineCap="round" android:pathData="M38,50 A18,18 0,0 1,70,50" />
+    <path android:fillColor="@android:color/transparent" android:strokeColor="#FFFFFF" android:strokeWidth="5"
+        android:strokeLineCap="round" android:pathData="M44,53 A11,11 0,0 1,64,53" />
+    <path android:fillColor="#FFFFFF" android:pathData="M51,56m-3,0a3,3 0,1 0,6,0a3,3 0,1 0,-6,0" />
+    <!-- Cellular dots -->
+    <path android:fillColor="#FFFFFF" android:pathData="M38,76m-2.5,0a2.5,2.5 0,1 0,5,0a2.5,2.5 0,1 0,-5,0 M49,79m-2.5,0a2.5,2.5 0,1 0,5,0a2.5,2.5 0,1 0,-5,0 M60,79m-2.5,0a2.5,2.5 0,1 0,5,0a2.5,2.5 0,1 0,-5,0 M71,76m-2.5,0a2.5,2.5 0,1 0,5,0a2.5,2.5 0 1 0,-5,0" />
 </vector>

@@ -1,126 +1,271 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/duo_bg"
     android:fillViewport="true"
-    android:padding="20dp">
+    android:clipToPadding="false">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="iOS Duo Status Bar"
-            android:textSize="28sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="Status: Nonaktif"
-            android:textSize="14sp" />
+        android:orientation="vertical"
+        android:paddingStart="18dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="18dp"
+        android:paddingBottom="32dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnStart"
+            <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="START" />
-
-            <Button
-                android:id="@+id/btnStop"
-                android:layout_width="0dp"
+                android:text="iOS Duo"
+                android:textColor="@color/duo_text"
+                android:textSize="30sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_weight="1"
-                android:text="STOP" />
+                android:background="@drawable/pill_bg"
+                android:paddingStart="12dp"
+                android:paddingTop="6dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="6dp"
+                android:text="v5.2"
+                android:textColor="@color/duo_text"
+                android:textSize="12sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
-            android:text="Overlay Configuration"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvLabelSize"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:text="Ukuran ikon: 34 dp" />
-
-        <SeekBar
-            android:id="@+id/seekSize"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="76"
-            android:progress="10" />
+            android:layout_marginTop="5dp"
+            android:text="Premium system telemetry overlay for Android"
+            android:textColor="@color/duo_secondary"
+            android:textSize="14sp" />
 
-        <TextView
-            android:id="@+id/tvLabelX"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Offset kanan (X): 10 dp" />
-
-        <SeekBar
-            android:id="@+id/seekX"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="100"
-            android:progress="10" />
-
-        <TextView
-            android:id="@+id/tvLabelY"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Offset vertikal (Y): -8 dp" />
-
-        <SeekBar
-            android:id="@+id/seekY"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="128"
-            android:progress="40" />
-
-        <TextView
-            android:id="@+id/tvLabelAlpha"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Opasitas: 100%" />
-
-        <SeekBar
-            android:id="@+id/seekAlpha"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="100"
-            android:progress="100" />
-
-        <TextView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
-            android:text="AUTO Contrast: warna foreground mengikuti mode terang/gelap sistem, dengan micro-halo hitam/putih untuk menjaga ketajaman pada wallpaper yang kompleks. Tidak memakai screen capture."
-            android:textSize="13sp" />
+            app:cardBackgroundColor="#111318"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#242932"
+            app:strokeWidth="1dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="18dp">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="OVERLAY STATUS"
+                        android:textColor="#8E96A3"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tvStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Status: Nonaktif"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+                <Button
+                    android:id="@+id/btnStart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="44dp"
+                    android:text="START"
+                    android:textStyle="bold"
+                    app:cornerRadius="14dp" />
+                <Button
+                    android:id="@+id/btnStop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:minHeight="44dp"
+                    android:text="STOP"
+                    app:cornerRadius="14dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#E2E5EA"
+            app:strokeWidth="1dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cara menggunakan"
+                    android:textColor="@color/duo_text"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="1  Tekan START dan izinkan Tampil di atas aplikasi lain.\n2  Atur ukuran, posisi, dan ketebalan indikator.\n3  Aktifkan Camera Hole Mode jika kamera berada di tengah ring.\n4  Tekan SIMPAN &amp; TERAPKAN untuk menerapkan perubahan."
+                    android:textColor="@color/duo_secondary"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="3dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:text="APPEARANCE &amp; POSITION"
+            android:textColor="@color/duo_secondary"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#E2E5EA"
+            app:strokeWidth="1dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+                <TextView android:id="@+id/tvLabelSize" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ukuran ikon: 34 dp" android:textColor="@color/duo_text" android:textStyle="bold" />
+                <SeekBar android:id="@+id/seekSize" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="76" android:progress="10" />
+                <TextView android:id="@+id/tvLabelX" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Offset kanan (X): 10 dp" android:textColor="@color/duo_text" />
+                <SeekBar android:id="@+id/seekX" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="100" android:progress="10" />
+                <TextView android:id="@+id/tvLabelY" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Offset vertikal (Y): -8 dp" android:textColor="@color/duo_text" />
+                <SeekBar android:id="@+id/seekY" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="128" android:progress="40" />
+                <TextView android:id="@+id/tvLabelAlpha" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Opasitas: 100%" android:textColor="@color/duo_text" />
+                <SeekBar android:id="@+id/seekAlpha" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="100" android:progress="100" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:text="INDICATOR DETAIL"
+            android:textColor="@color/duo_secondary"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#E2E5EA"
+            app:strokeWidth="1dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+                <TextView android:id="@+id/tvLabelLine" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ketebalan arc: 2.2 dp" android:textColor="@color/duo_text" android:textStyle="bold" />
+                <SeekBar android:id="@+id/seekLine" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="30" android:progress="12" />
+                <TextView android:id="@+id/tvLabelTextSize" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ukuran angka: 8.5 sp" android:textColor="@color/duo_text" android:textStyle="bold" />
+                <SeekBar android:id="@+id/seekTextSize" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="90" android:progress="35" />
+                <TextView android:id="@+id/tvLabelTextWeight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ketebalan angka: 700" android:textColor="@color/duo_text" android:textStyle="bold" />
+                <SeekBar android:id="@+id/seekTextWeight" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="50" android:progress="30" />
+                <TextView android:id="@+id/tvLabelWifiStroke" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ketebalan Wi-Fi: 1.9 dp" android:textColor="@color/duo_text" android:textStyle="bold" />
+                <SeekBar android:id="@+id/seekWifiStroke" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="25" android:progress="9" />
+                <TextView android:id="@+id/tvLabelDotSize" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ukuran titik operator: 2.0 dp" android:textColor="@color/duo_text" android:textStyle="bold" />
+                <SeekBar android:id="@+id/seekDotSize" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="30" android:progress="10" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:text="WI-FI &amp; CAMERA HOLE"
+            android:textColor="@color/duo_secondary"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#E2E5EA"
+            app:strokeWidth="1dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+                <android.widget.Switch
+                    android:id="@+id/switchWifiOutside"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Wi-Fi di luar ring"
+                    android:textColor="@color/duo_text"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Untuk punch-hole di tengah: Wi-Fi dipindahkan ke samping angka baterai pada garis horizontal yang sama."
+                    android:textColor="@color/duo_secondary"
+                    android:textSize="12sp" />
+                <TextView android:id="@+id/tvLabelWifiOffset" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Offset Wi-Fi: 0.0 dp" android:textColor="@color/duo_text" android:textStyle="bold" />
+                <SeekBar android:id="@+id/seekWifiOffset" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="480" android:progress="240" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="AUTO CONTRAST  •  Foreground menyesuaikan wallpaper/system appearance. Tidak menggunakan screen capture."
+            android:textColor="@color/duo_secondary"
+            android:textSize="11sp" />
 
         <Button
             android:id="@+id/btnApply"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="SIMPAN &amp; TERAPKAN" />
-
+            android:layout_marginTop="16dp"
+            android:minHeight="52dp"
+            android:text="SIMPAN &amp; TERAPKAN"
+            android:textStyle="bold"
+            app:cornerRadius="16dp" />
     </LinearLayout>
 </ScrollView>

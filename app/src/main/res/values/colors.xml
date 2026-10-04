@@ -2,4 +2,11 @@
 <resources>
     <color name="duo_black">#050505</color>
     <color name="duo_white">#FFFFFF</color>
+    <color name="duo_bg">#F5F6F8</color>
+    <color name="duo_surface">#FFFFFF</color>
+    <color name="duo_surface_alt">#EEF1F5</color>
+    <color name="duo_text">#111318</color>
+    <color name="duo_secondary">#68707C</color>
+    <color name="duo_line">#DDE1E7</color>
+    <color name="duo_accent">#111318</color>
 </resources>
